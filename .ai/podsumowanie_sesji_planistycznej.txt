@@ -1,0 +1,514 @@
+{{latest-round-answers}} <- twoja lista odpowiedzi na ostatnią rundę pytań
+
+---
+
+# Podsumowanie Rozmowy - PRD dla Edukacyjnej Gry "Dopasuj Obrazek do Słowa"
+
+## Decyzje Podjęte przez Użytkownika
+
+1. **Grupa docelowa**: Dzieci w wieku 4-6 lat
+2. **Model kont**: Jedno konto rodzica zarządza wieloma profilami dzieci (mechanizm podobny do YouTube Kids), bez emaili dla dzieci
+3. **System motywacji**: Tylko gwiazdki (total_stars) i tracker postępu, bez dodatkowych odznak czy poziomów
+4. **Mechanika gry**: Zaakceptowano propozycję - 1 obrazek + 3 przyciski (1 poprawne, 2 dystraktory), pozytywny feedback po błędzie, brak limitu czasu
+5. **Źródło treści**: AI do wygenerowania całego setu danych - 5 kategorii po 50 obrazków (Google Imagen/Banana)
+6. **Metryki sukcesu**: Zaakceptowano propozycję KPI (User Acquisition, Engagement, Retention, Completion Rate, Technical metrics)
+7. **Urządzenia docelowe**: Mobile i desktop jako aplikacja webowa, tylko skalowanie elementów (bez drastycznych zmian layoutu)
+8. **Prywatność**: Minimum danych osobowych
+9. **Tryb działania**: Tylko online (bez funkcjonalności offline)
+10. **Timeline i zasoby**: Praca solo w trybie ekspresowym - 7 dni po 1-2h dziennie (7-14h total)
+
+---
+
+## Dopasowane Zalecenia
+
+### Architektura i Technologia
+
+1. **Model kont rodzic-dziecko**: Jedno konto rodzica (email/hasło) z możliwością utworzenia 3-5 profili dzieci. Wybór profilu przez avatar bez PIN dla MVP (uproszczenie rozwoju).
+
+2. **Generowanie treści AI**: Batch-generowanie wszystkich 250 obrazków przed rozpoczęciem kodowania używając Google Imagen/Banana z jednym spójnym promptem stylistycznym (np. "colorful flat illustration for children, simple, friendly, white background"). Zapis w Supabase Storage.
+
+3. **Kategorie słownictwa**: 
+   - Zwierzęta
+   - Owoce i Warzywa
+   - Pojazdy
+   - Kolory i Kształty
+   - Przedmioty Codziennego Użytku
+   
+   Tylko język polski dla MVP (z przygotowaniem struktury DB dla przyszłej multilingwalności).
+
+### Mechanika Gry
+
+4. **Algorytm doboru dystraktorów**: 2 dystraktory losowane z tej samej kategorii, unikając powtórzeń w bieżącej sesji. SQL: `SELECT * FROM vocabulary WHERE category = $1 AND id NOT IN ($2) ORDER BY RANDOM() LIMIT 3`.
+
+5. **Definicja opanowania słowa**: Słowo uznawane za opanowane po 1 poprawnej odpowiedzi (is_mastered = true). Opanowane słowa nadal mogą się pojawiać z 20% prawdopodobieństwem dla powtórek utrwalających.
+
+6. **Struktura sesji**: Wybór kategorii → 10 pytań z rzędu → Ekran podsumowania (gwiazdki, liczba poprawnych, motywujący komunikat) → "Zagraj ponownie" lub "Wybierz inną kategorię".
+
+### UI/UX
+
+7. **Flow onboardingu**: Rejestracja rodzica → Natychmiastowe utworzenie pierwszego profilu dziecka (imię + avatar z 6-8 opcji) → Dashboard z kategoriami. Dodawanie kolejnych profili przez menu "Zarządzaj profilami".
+
+8. **Responsywność**: Mobile-first approach. Breakpointy:
+   - Mobile (<640px): layout pionowy, 1 kolumna, duże przyciski
+   - Desktop (≥1024px): layout centralny z max-width, większe obrazki
+   - Minimalna wielkość przycisków: 80x80px (preferowane 100x100px)
+   - Touch targets min. 44x44px (WCAG)
+
+### Metryki Sukcesu (KPI)
+
+9. **User Acquisition**: 20+ zarejestrowanych rodzin w pierwszym miesiącu
+10. **Engagement**: Średnio 15 ukończonych słów na dziecko w pierwszym tygodniu
+11. **Retention**: 40% D1 retention (dzieci wracają następnego dnia)
+12. **Completion Rate**: 60% rozpoczętych sesji kończy się ukończeniem 10 pytań
+13. **Technical**: <2s czas ładowania, 0 critical bugs
+
+### Scope MVP
+
+14. **NIE wchodzi do MVP**:
+   - Panel administracyjny/CMS
+   - Zaawansowane raporty postępów
+   - Dźwięki i muzyka (opcjonalnie jako nice-to-have)
+   - Rozbudowane animacje
+   - System osiągnięć/odznak
+   - Eksport/sharing wyników
+   - Dark mode
+
+15. **Wchodzi do MVP**:
+   - Auth (rejestracja, login, logout)
+   - Profile dzieci (CRUD)
+   - 5 kategorii × 50 słów
+   - Core game loop
+   - Zapis postępów
+   - Podstawowy responsive UI
+
+---
+
+## Szczegółowe Podsumowanie Planowania PRD
+
+### 1. Główne Wymagania Funkcjonalne
+
+#### 1.1 System Uwierzytelniania
+- **Rejestracja i logowanie rodzica** przez Supabase Auth (email/password)
+- **Brak osobnych kont dla dzieci** - profile dzieci zarządzane przez konto rodzica
+- **Protected routes** - dostęp do gry tylko dla zalogowanych użytkowników
+- **Automatyczne tworzenie profilu** w tabeli `profiles` po rejestracji (SQL Trigger)
+- **Biblioteka**: @supabase/auth-ui-react dla gotowych formularzy
+
+#### 1.2 Zarządzanie Profilami Dzieci
+- **CRUD profili dzieci** w ramach jednego konta rodzica
+- **Maksymalnie 3-5 profili** na konto rodzica
+- **Dane profilu dziecka**: display_name, avatar (wybór z 6-8 opcji), total_stars
+- **Wybór profilu**: Kliknięcie w avatar bez PIN (uproszczenie MVP)
+- **Tabela DB**: `profiles` powiązana z `auth.users`
+
+#### 1.3 Baza Danych Słownictwa
+- **250 słów** (5 kategorii × 50 słów)
+- **Kategorie**: Zwierzęta, Owoce i Warzywa, Pojazdy, Kolory i Kształty, Przedmioty Codziennego Użytku
+- **Tabela `vocabulary`**: 
+  - word (tekst słowa)
+  - image_url (link do Supabase Storage)
+  - category
+  - language (default: 'pl')
+- **Dystraktory**: 2 losowe słowa z tej samej kategorii
+- **Źródło obrazków**: Google Imagen/Banana, styl "colorful flat illustration for children, simple, friendly, white background"
+
+#### 1.4 Core Game Loop
+- **Flow gry**: 
+  1. Dashboard → Wybór kategorii
+  2. 10 pytań z wybranej kategorii
+  3. Każde pytanie: 1 obrazek + 3 przyciski (1 poprawne, 2 dystraktory)
+  4. Feedback natychmiastowy po odpowiedzi
+  5. Ekran podsumowania sesji
+- **Mechanika odpowiedzi**: 
+  - Brak limitu czasu
+  - Po błędzie: pozytywny komunikat "Spróbuj jeszcze raz!"
+  - Po sukcesie: animacja, dźwięk (opcjonalnie), dodanie gwiazdki
+- **Algorytm doboru**: SQL query losujący słowa z wybranej kategorii, priorytet dla nieopanowanych (80% vs 20%)
+
+#### 1.5 System Postępów
+- **Tabela `user_progress`**: user_id, word_id, is_mastered, attempts, last_attempt_at
+- **Zapis postępu**: UPSERT po każdej poprawnej odpowiedzi
+- **Definicja opanowania**: 1 poprawna odpowiedź = is_mastered: true
+- **Wyświetlanie**: Tracker postępu na kategorie, total_stars w profilu
+- **Persistence**: Wszystkie dane w Supabase (PostgreSQL)
+
+### 2. Kluczowe Historie Użytkownika i Ścieżki
+
+#### User Story 1: Nowy Rodzic
+**Jako** nowy rodzic  
+**Chcę** szybko zarejestrować się i stworzyć profil dla mojego dziecka  
+**Aby** dziecko mogło natychmiast rozpocząć naukę
+
+**Ścieżka**:
+1. Wejście na stronę główną
+2. Kliknięcie "Zarejestruj się"
+3. Wypełnienie formularza (email, hasło) - Supabase Auth UI
+4. Automatyczne przekierowanie do "Utwórz profil dziecka"
+5. Wprowadzenie imienia dziecka, wybór avatara
+6. Przekierowanie do dashboardu z kategoriami
+7. Rozpoczęcie gry
+
+**Akceptacja**: Cały proces <2 minut, wszystkie dane zapisane w Supabase
+
+#### User Story 2: Dziecko Gra
+**Jako** dziecko w wieku 4-6 lat  
+**Chcę** dopasowywać obrazki do słów w przyjazny sposób  
+**Aby** uczyć się nowych słów i zbierać gwiazdki
+
+**Ścieżka**:
+1. Rodzic wybiera profil dziecka (kliknięcie avatar)
+2. Dziecko widzi dashboard z 5 kategoriami
+3. Dziecko wybiera kategorię (np. "Zwierzęta")
+4. Ładowanie 10 pytań z kategorii
+5. Dla każdego pytania:
+   - Wyświetlenie obrazka (duży, centralny)
+   - 3 przyciski z słowami (duże, kolorowe)
+   - Dziecko klika odpowiedź
+   - Natychmiastowy feedback (animacja + dźwięk)
+   - Jeśli błąd: "Spróbuj jeszcze raz!" (może kliknąć ponownie)
+   - Jeśli sukces: Dodanie gwiazdki, przejście do następnego
+6. Po 10 pytaniach: Ekran podsumowania
+7. Opcja: "Zagraj ponownie" lub "Wybierz inną kategorię"
+
+**Akceptacja**: 
+- Wszystkie przyciski >80px
+- Czas ładowania pytania <2s
+- Brak frustrujących komunikatów
+- Jasny wizualny feedback sukcesu
+
+#### User Story 3: Rodzic Monitoruje Postęp
+**Jako** rodzic  
+**Chcę** widzieć postępy mojego dziecka  
+**Aby** ocenić skuteczność nauki
+
+**Ścieżka** (MVP - uproszczona):
+1. Logowanie do aplikacji
+2. Wybór profilu dziecka
+3. Wyświetlenie podstawowych statystyk:
+   - Total_stars (łączna liczba gwiazdek)
+   - Tracker postępu na kategorie (np. "Zwierzęta: 35/50")
+4. (Zaawansowane raporty w v2)
+
+**Akceptacja**: Widoczność basic metrics na dashboardzie
+
+#### User Story 4: Rodzic Zarządza Wieloma Dziećmi
+**Jako** rodzic z dwójką/trójką dzieci  
+**Chcę** łatwo przełączać się między profilami dzieci  
+**Aby** każde dziecko miało osobny postęp
+
+**Ścieżka**:
+1. Logowanie do aplikacji
+2. Ekran wyboru profilu z avatarami wszystkich dzieci
+3. Kliknięcie avatara wybranego dziecka
+4. Wejście do dashboardu tego dziecka
+5. Menu "Zarządzaj profilami":
+   - Dodaj nowe dziecko (imię + avatar)
+   - Edytuj istniejące (zmiana imienia/avatara)
+   - Usuń profil (z ostrzeżeniem)
+6. Przycisk "Zmień profil" widoczny w menu
+
+**Akceptacja**: Obsługa minimum 3 profili, przełączanie <3 kliknięcia
+
+### 3. Kryteria Sukcesu i Mierzenie
+
+#### 3.1 Metryki Produktowe (KPI)
+
+**User Acquisition (Pozyskanie Użytkowników)**
+- **Metryka**: Liczba zarejestrowanych kont rodzica
+- **Target MVP**: 20+ rodzin w pierwszym miesiącu (soft launch)
+- **Pomiar**: Supabase query: `SELECT COUNT(*) FROM auth.users WHERE created_at > $date`
+
+**Engagement (Zaangażowanie)**
+- **Metryka**: Średnia liczba ukończonych słów na profil dziecka
+- **Target MVP**: 15+ słów w pierwszym tygodniu użytkowania
+- **Pomiar**: `SELECT AVG(word_count) FROM (SELECT user_id, COUNT(*) as word_count FROM user_progress WHERE is_mastered = true GROUP BY user_id)`
+
+**Retention (Utrzymanie)**
+- **Metryka**: D1 Retention (% dzieci wracających następnego dnia)
+- **Target MVP**: 40%
+- **Pomiar**: 
+```sql
+SELECT 
+  COUNT(DISTINCT d1.user_id) / COUNT(DISTINCT d0.user_id) * 100 as d1_retention
+FROM user_progress d0
+LEFT JOIN user_progress d1 
+  ON d0.user_id = d1.user_id 
+  AND DATE(d1.last_attempt_at) = DATE(d0.created_at) + 1
+```
+
+**Completion Rate (Wskaźnik Ukończenia)**
+- **Metryka**: % sesji zakończonych ukończeniem wszystkich 10 pytań
+- **Target MVP**: 60%
+- **Pomiar**: Tracking session_id w tabeli pomocniczej (opcjonalnie dla v2)
+
+**Technical Performance**
+- **Metryka**: Czas ładowania ekranu gry
+- **Target**: <2s (LCP - Largest Contentful Paint)
+- **Pomiar**: Lighthouse CI, Web Vitals
+- **Zero critical bugs**: Monitoring Sentry lub podobny
+
+#### 3.2 Kryteria Sukcesu Jakościowego
+
+**Użyteczność dla Dzieci**
+- Dziecko potrafi samodzielnie wybrać kategorię i rozpocząć grę (po pierwszym pokazaniu przez rodzica)
+- Brak frustracji przy popełnianiu błędów
+- Jasny feedback wizualny i dźwiękowy
+
+**Satysfakcja Rodziców**
+- Rodzic widzi postępy dziecka bez dodatkowych narzędzi
+- Proces rejestracji i setup <2 minut
+- Brak obaw o prywatność danych
+
+**Stabilność Techniczna**
+- Aplikacja działa na Chrome, Safari, Firefox (mobile + desktop)
+- Brak błędów zapisu postępu (wszystkie gwiazki i opanowane słowa są zapisywane)
+- Responsywność na różnych rozdzielczościach
+
+### 4. Stack Technologiczny - Szczegóły Implementacji
+
+#### Frontend
+- **Framework**: Astro 5 (Hybrid Rendering - SSR dla auth pages, CSR dla game)
+- **UI Library**: React 19 + TypeScript 5
+- **Stylizacja**: Tailwind CSS 4 + Shadcn/UI
+- **Component Strategy**: React islands dla interaktywnych części (game loop, profile selector)
+
+#### Backend
+- **BaaS**: Supabase
+  - **Database**: PostgreSQL (tabele: profiles, vocabulary, user_progress)
+  - **Auth**: GoTrue Auth (@supabase/auth-ui-react)
+  - **Storage**: Supabase Storage dla obrazków (250 plików)
+  - **Real-time**: Opcjonalnie dla live progress updates (v2)
+
+#### Database Schema
+```sql
+-- profiles table
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  display_name TEXT NOT NULL,
+  avatar TEXT,
+  total_stars INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- vocabulary table
+CREATE TABLE vocabulary (
+  id SERIAL PRIMARY KEY,
+  word TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  category TEXT NOT NULL,
+  language TEXT DEFAULT 'pl',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- user_progress table
+CREATE TABLE user_progress (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  word_id INTEGER REFERENCES vocabulary(id),
+  is_mastered BOOLEAN DEFAULT FALSE,
+  attempts INTEGER DEFAULT 0,
+  last_attempt_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, word_id)
+);
+```
+
+#### Deployment
+- **Hosting**: Vercel lub Netlify (najlepiej Vercel dla Astro)
+- **Database**: Supabase Cloud (Free tier dla MVP)
+- **CDN**: Automatycznie przez Vercel/Netlify
+- **Domain**: Custom domain (opcjonalnie)
+
+### 5. Harmonogram 7-Dniowy (1-2h/dzień)
+
+#### Dzień 0 (Pre-work, wieczór przed)
+- Generowanie 250 obrazków przez Google Imagen/Banana
+- Przygotowanie prompta: "colorful flat illustration for children showing [WORD], simple, friendly, white background, vector style"
+- Batch processing wszystkich kategorii
+- Organizacja plików: naming convention `category-word.png`
+
+#### Dzień 1 (2h) - Project Setup
+- [ ] Init Astro 5 project: `npm create astro@latest`
+- [ ] Install dependencies: React 19, TypeScript, Tailwind CSS 4, Shadcn/UI
+- [ ] Setup Supabase project + local env variables
+- [ ] Struktura folderów:
+  ```
+  /src
+    /components (React islands)
+    /layouts
+    /pages (Astro pages)
+    /lib (Supabase client, utils)
+    /styles
+  ```
+- [ ] Tailwind config + Shadcn/UI init
+- **Output**: Działający skeleton aplikacji
+
+#### Dzień 2 (2h) - Database & Auth Setup
+- [ ] Supabase: Utworzenie tabel (profiles, vocabulary, user_progress)
+- [ ] SQL Triggers: Auto-create profile po rejestracji
+- [ ] Seed data: Upload 250 słów do tabeli vocabulary
+- [ ] Supabase Storage: Upload 250 obrazków
+- [ ] Test connection: Supabase client w Astro
+- **Output**: Działająca baza z danymi
+
+#### Dzień 3 (2h) - Auth Flow
+- [ ] Page: /login (Supabase Auth UI)
+- [ ] Page: /register (Supabase Auth UI)
+- [ ] Protected middleware dla /dashboard i /game
+- [ ] Logout functionality
+- [ ] Test całego flow auth
+- **Output**: Działające logowanie/rejestracja
+
+#### Dzień 4 (2h) - Profile Management
+- [ ] Dashboard: Wybór/tworzenie profilu dziecka
+- [ ] Component: ProfileCard (avatar + display_name)
+- [ ] CRUD dla profili dzieci (Create, Read, Delete)
+- [ ] Wybór avatara z 6-8 opcji
+- [ ] Context/State management dla aktywnego profilu
+- **Output**: Działające zarządzanie profilami
+
+#### Dzień 5 (2h) - Core Game Loop
+- [ ] Page: /categories (wybór kategorii)
+- [ ] Page: /game/[category] (ekran gry)
+- [ ] Fetch logic: 10 pytań z kategorii + 2 dystraktory
+- [ ] Game Component: Obrazek + 3 przyciski
+- [ ] Click handler: Sprawdzenie odpowiedzi
+- [ ] Zapis postępu: UPSERT do user_progress
+- [ ] Update total_stars
+- **Output**: Działająca pętla gry
+
+#### Dzień 6 (2h) - UI/UX Polish
+- [ ] Stylizacja z Shadcn/UI (Button, Card, Avatar)
+- [ ] Responsywność: Mobile + Desktop breakpoints
+- [ ] Ekran podsumowania sesji (Summary Component)
+- [ ] Animacje sukcesu (opcjonalnie Framer Motion)
+- [ ] Loading states i error handling
+- [ ] Tracker postępu na dashboardzie
+- **Output**: Estetyczny i responsywny UI
+
+#### Dzień 7 (1h) - Testing & Deployment
+- [ ] E2E testing: Cały flow użytkownika
+- [ ] Bug fixing
+- [ ] Performance check: Lighthouse
+- [ ] Deploy na Vercel
+- [ ] Final smoke test na produkcji
+- **Output**: Działająca aplikacja live
+
+**Największe ryzyko**: Integracja Supabase Auth z React w Astro (SSR/CSR mismatch)  
+**Mitygacja**: Użycie hybrid rendering, komponenty auth jako client-side islands `client:load`
+
+---
+
+## Nierozwiązane Kwestie
+
+### 1. Generator Obrazków - Szczegóły Techniczne
+**Kwestia**: Czy użytkownik ma już dostęp do Google Imagen/Banana? Jaki jest proces batch-generowania 250 obrazków?
+
+**Potrzebne wyjaśnienie**: 
+- Klucz API i limity Google Imagen
+- Czy istnieje skrypt do automatycznego generowania z listy słów?
+- Backup plan jeśli Imagen będzie niedostępny (np. użycie Stable Diffusion, DALL-E)
+
+**Wpływ na timeline**: Pre-work (Dzień 0) może zająć więcej czasu jeśli proces nie jest zautomatyzowany
+
+---
+
+### 2. Dźwięki i Muzyka
+**Kwestia**: Czy dźwięki wchodzą do MVP jako "nice-to-have" czy są całkowicie wycięte?
+
+**Potrzebne wyjaśnienie**:
+- Czy są gotowe sound effects (success, error)?
+- Jeśli tak, format i źródło (royalty-free)?
+- Implementacja: HTML5 Audio API vs biblioteka (Howler.js)?
+
+**Wpływ**: Jeśli wchodzą, dodaj 30-60min do Dzień 6
+
+---
+
+### 3. Avatary dla Dzieci
+**Kwestia**: Skąd pochodzą 6-8 opcji avatarów dla profili dzieci?
+
+**Potrzebne wyjaśnienie**:
+- Czy użytkownik przygotuje custom ilustracje?
+- Czy użyjemy emoji/ikony (😀🐶🦁🚀🌈⚽)?
+- Czy wygenerujemy przez AI podobnie jak obrazki do gry?
+
+**Wpływ**: Jeśli trzeba generować, dodaj to do Dzień 0 pre-work
+
+---
+
+### 4. Nazwa Aplikacji i Branding
+**Kwestia**: Jaka jest finalna nazwa aplikacji? Czy "Dopasuj Obrazek do Słowa" to nazwa robocza czy finalna?
+
+**Potrzebne wyjaśnienie**:
+- Nazwa produktu (dla meta tags, title)
+- Logo (czy jest? czy potrzebne dla MVP?)
+- Color scheme (poza Tailwind defaults)
+
+**Wpływ**: Minimalny, ale potrzebne dla deployment i SEO
+
+---
+
+### 5. Testowanie z Prawdziwymi Dziećmi
+**Kwestia**: Czy po MVP planowany jest user testing z grupą docelową (dzieci 4-6 lat)?
+
+**Potrzebne wyjaśnienie**:
+- Kto będzie testerami? (Rodzina/znajomi użytkownika?)
+- Kiedy testy? (Dzień 8-14 po MVP?)
+- Jak zbierać feedback od tak młodych dzieci?
+
+**Wpływ**: Może wpłynąć na priorytetyzację v1.1 features
+
+---
+
+### 6. Hosting i Koszty
+**Kwestia**: Czy budżet pozwala na płatne plany, czy MVP musi zmieścić się w free tierach?
+
+**Potrzebne wyjaśnienie**:
+- Supabase Free tier limity: 500MB database, 1GB storage, 2GB bandwidth/month
+- 250 obrazków @ ~50KB = ~12.5MB (OK)
+- Projekcja użytkowników: 20 rodzin × 3 dzieci = 60 profili (OK dla free tier)
+- Vercel Free tier: OK dla MVP
+
+**Wpływ**: Brak, free tier wystarczy dla MVP
+
+---
+
+### 7. Analytics i Monitoring
+**Kwestia**: Czy potrzebujemy Google Analytics / Plausible dla MVP, czy wystarczą metryki z Supabase?
+
+**Potrzebne wyjaśnienie**:
+- Czy RODO/privacy policy pozwalają na GA4?
+- Alternatywa: Plausible (privacy-friendly) lub tylko Supabase queries
+
+**Wpływ**: Jeśli GA4, dodaj 15-30min do Dzień 7 (setup + privacy notice)
+
+---
+
+### 8. Multi-device Sync
+**Kwestia**: Jeśli rodzic loguje się na tablecie i telefonie, czy postęp dziecka synchronizuje się w czasie rzeczywistym?
+
+**Potrzebne wyjaśnienie**:
+- Dla MVP: Tak, automatycznie (Supabase real-time subscriptions - opcjonalnie)
+- Wystarczy refresh page dla prostszej implementacji?
+
+**Wpływ**: Real-time sync dodaje complexity, dla MVP lepiej refresh
+
+---
+
+## Podsumowanie Gotowości do PRD
+
+**Status**: ✅ Gotowe do przygotowania szczegółowego PRD
+
+**Kompletność informacji**: 90%
+
+**Główne ryzyka**:
+1. ⚠️ Tight timeline (7 dni × 1-2h = 7-14h total)
+2. ⚠️ Brak doświadczenia z Supabase Auth w Astro (learning curve)
+3. ⚠️ Generowanie 250 obrazków AI (time-consuming jeśli nie zautomatyzowane)
+
+**Zalecenia przed rozpoczęciem kodowania**:
+1. **Dzień -1**: Przygotuj wszystkie obrazki AI (250 plików) + avatary
+2. **Dzień -1**: Setup Supabase project, zweryfikuj connection
+3. **Dzień -1**: Przejrzyj Astro + Supabase Auth tutorial (30min)
+4. **Dzień 1**: Zacznij od auth flow (najwyższe ryzyko), nie od UI
+

@@ -1,0 +1,58 @@
+To świetny zestaw założeń. Wygląda na to, że przeszliśmy od ogólnej koncepcji MVP do solidnej architektury, która nie „rozsypie się” przy dodaniu drugiego języka czy setnego użytkownika. Doceniam wybór Single Source of Truth przy obliczaniu gwiazdek – Twoje przyszłe „ja” podziękuje Ci za brak konieczności debugowania rozbieżnych liczników.
+
+Poniżej przygotowałem formalne podsumowanie naszej dotychczasowej współpracy projektowej, które zamknie ten etap i otworzy drogę do kodu SQL.
+
+<conversation_summary> <decisions>
+
+Model subskrypcji/zarządzania: Przyjęto model, w którym jeden rodzic (konto Auth) zarządza od 3 do 5 profilami dzieci.
+
+Dynamiczne statystyki: Zrezygnowano z denormalizacji (ręcznego licznika gwiazdek) na rzecz dynamicznych widoków SQL (View), co gwarantuje spójność danych.
+
+Typizacja kategorii: Wykorzystanie typu ENUM dla kategorii słownictwa w celu zapewnienia integralności danych na poziomie silnika bazy.
+
+Strategia usuwania: Zastosowanie ON DELETE CASCADE, aby zapewnić automatyczne "sprzątanie" danych powiązanych przy usuwaniu profilu.
+
+Obsługa algorytmu: Implementacja indeksów na is_mastered i category w celu wsparcia algorytmu 80/20 (inteligentne serwowanie słówek).
+
+I18n: Wprowadzenie kolumny language_code do tabeli słownictwa już na starcie.
+
+</decisions>
+
+<matched_recommendations>
+
+Pojedyncze źródło prawdy (SSOT): Zidentyfikowano jako kluczowe dla uniknięcia błędów w postępach dziecka.
+
+Bezpieczeństwo RLS: Wykorzystanie zagnieżdżonych zapytań w politykach Row Level Security do weryfikacji uprawnień rodzic-dziecko.
+
+Oddzielenie mediów: Przechowywanie ścieżek relatywnych zamiast pełnych URL-i lub (o zgrozo) plików binarnych w bazie.
+
+Indeksowanie pod algorytm: Optymalizacja zapytań pod kątem losowania słów nieopanowanych. </matched_recommendations>
+
+<database_planning_summary>
+
+Główne wymagania schematu
+Baza danych musi obsługiwać wielodostępność (multi-tenancy) na poziomie profili dzieci w ramach jednego konta rodzica, zachowując ścisłą separację danych. System musi efektywnie zarządzać relacją między słownikiem a postępami indywidualnych graczy.
+
+Kluczowe encje i relacje
+auth.users (Supabase): System uwierzytelniania.
+
+profiles: Zawiera dane dzieci, powiązane z auth.users via parent_id (1:N).
+
+vocabulary: Centralny słownik z tagami językowymi i kategoriami (jako ENUM).
+
+user_progress: Tabela łącząca (Join Table) dla profili i słownictwa, przechowująca stan opanowania słowa i liczbę zdobytych gwiazdek (N:M).
+
+Bezpieczeństwo i skalowalność
+RLS (Row Level Security): Kluczowy mechanizm obronny. Każdy SELECT/UPDATE na tabelach powiązanych z dzieckiem przechodzi przez filtr parent_id.
+
+Skalowalność: Dzięki language_code, dodanie nowych języków wymaga jedynie importu danych, a nie zmiany struktury aplikacji.
+
+Wydajność: Indeksy B-tree na kluczach obcych i kolumnach logicznych algorytmu zapewnią płynność działania przy rosnącej bazie słów. </database_planning_summary>
+
+<unresolved_issues>
+
+Dokładna lista kategorii: Musimy zdefiniować konkretne wartości dla typu ENUM (np. 'Zwierzęta', 'Pojazdy', 'Owoce'), aby skrypt był gotowy do użycia.
+
+Logika limitu profili: Czy limit 3-5 profili ma być twardym ograniczeniem w bazie (Trigger), czy tylko walidacją po stronie aplikacji? (Zalecany Trigger dla bezpieczeństwa).
+
+Struktura Storage: Wymaga potwierdzenia nazewnictwa bucketów w Supabase Storage, aby ścieżki w bazie były z nimi zgodne. </unresolved_issues> </conversation_summary>

@@ -1,0 +1,47 @@
+Wizja Projektu: Edukacyjna gra webowa "Dopasuj Obrazek do Słowa" dla dzieci, z systemem kont dla rodziców/dzieci, umożliwiającym trwałe zapisywanie postępów w chmurze.
+
+Stack Technologiczny:
+
+Framework: Astro 5 (Hybrid Rendering).
+
+Frontend: React 19 + TypeScript 5.
+
+Stylizacja: Tailwind CSS 4 + Shadcn/UI.
+
+Backend/Auth: Supabase (PostgreSQL + GoTrue Auth).
+
+Biblioteka Auth: @supabase/auth-ui-react (dla natychmiastowej implementacji formularzy logowania).
+
+Kluczowe Moduły i Funkcjonalności:
+
+System Uwierzytelniania (Standard Auth):
+
+Pełna rejestracja i logowanie (Email/Password) przy użyciu Supabase Auth.
+
+Chronione trasy (Protected Routes): Gra dostępna tylko dla zalogowanych użytkowników.
+
+Automatyczne tworzenie rekordu w tabeli profiles po rejestracji (Trigger SQL).
+
+Baza Danych i Postępy:
+
+Tabela profiles: Powiązana z auth.users, przechowująca display_name i total_stars.
+
+Tabela vocabulary: Obrazki, słowa, dystraktory (błędne odpowiedzi) i kategorie.
+
+Tabela user_progress: Śledzenie, które słowa zostały już opanowane przez danego użytkownika.
+
+Pętla Rozgrywki (Core Game Loop):
+
+Pobieranie zestawu danych z Supabase na podstawie wybranej kategorii.
+
+Mechanika wyboru odpowiedzi w React.
+
+Po poprawnej odpowiedzi: natychmiastowy zapis (UPSERT) postępu w Supabase.
+
+Interfejs Użytkownika:
+
+Ekran logowania/rejestracji (Shadcn + Supabase Auth UI).
+
+Dashboard z wyborem kategorii.
+
+Ekran gry z dużymi elementami interaktywnymi.
