@@ -154,8 +154,12 @@ export const POST: APIRoute = async (context) => {
     const error = dbError as { message?: string; code?: string };
 
     // Error 1: Profile limit exceeded (database trigger)
-    // Trigger message: "Rodzic może mieć maksymalnie 5 profili dzieci"
-    if (error.message?.includes('maksymalnie 5 profili')) {
+    // PostgreSQL error code P0001 = RAISE EXCEPTION
+    // Trigger message: "Maksymalnie 5 profili dzieci na rodzica"
+    if (
+      error.code === 'P0001' ||
+      error.message?.toLowerCase().includes('maksymalnie 5 profili')
+    ) {
       return new Response(
         JSON.stringify({
           error: 'profile_limit_exceeded',

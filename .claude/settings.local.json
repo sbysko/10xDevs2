@@ -6,7 +6,19 @@
       "Bash(npx tsc:*)",
       "Bash(npm run dev:*)",
       "Bash(curl:*)",
-      "Bash(npx supabase:*)"
+      "Bash(npx supabase:*)",
+      "Bash(JWT_TOKEN='eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjU0MzIxL2F1dGgvdjEiLCJzdWIiOiI5YWZhZTY5Ni1jNDlmLTRiMmUtYjdiMi01ZjBiZTM5MDE0OTgiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY5NTk5NDQ3LCJpYXQiOjE3Njk1OTU4NDcsImVtYWlsIjoidGVzdHBhcmVudEBleGFtcGxlLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJ0ZXN0cGFyZW50QGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiOWFmYWU2OTYtYzQ5Zi00YjJlLWI3YjItNWYwYmUzOTAxNDk4In0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3Njk1OTU4NDd9XSwic2Vzc2lvbl9pZCI6ImM2YTRmODgxLTQzNmYtNDJhMC1hYzU1LWZiM2I2NjU0ODAzNyIsImlzX2Fub255bW91cyI6ZmFsc2V9.ilczxfvb_JNeV-omyrxAT3uumCBpUqOEvZCcver_MGfh8ctS0nqeumqVsTvewtwo4_2e6j63g33zcb0EFhqN2A')",
+      "Bash(__NEW_LINE__ echo \"==========================================\")",
+      "Bash(__NEW_LINE__ echo \"Creating profile 3: Ania...\")",
+      "Bash(__NEW_LINE__ echo \"Creating profile 4: Piotr...\")",
+      "Bash(__NEW_LINE__ echo \"Creating profile 5: Kasia...\")",
+      "Bash(USER_ID='9afae696-c49f-4b2e-b7b2-5f0be3901498':*)",
+      "Bash(__NEW_LINE__ echo \"\")",
+      "Bash(psql:*)",
+      "Bash(/dev/null)",
+      "Bash(python -m json.tool:*)",
+      "Bash(token_response.json)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

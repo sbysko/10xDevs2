@@ -48,6 +48,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
    *
    * This client handles:
    * - Cookie-based session management
+   * - Authorization header (Bearer token) for API requests
    * - Automatic token refresh
    * - Server-side authentication
    */
@@ -75,6 +76,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
        */
       remove(key: string, options: any) {
         context.cookies.delete(key, options);
+      }
+    },
+    // Pass Authorization header to Supabase for Bearer token authentication
+    global: {
+      headers: {
+        Authorization: context.request.headers.get('Authorization') || ''
       }
     }
   });
