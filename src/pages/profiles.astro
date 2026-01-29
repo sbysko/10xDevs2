@@ -1,0 +1,40 @@
+---
+/**
+ * /profiles - Profile Selection Page
+ *
+ * This page allows children to select their profile to start playing.
+ * Parents can also manage profiles through the Parental Gate.
+ *
+ * Features:
+ * - Display all child profiles (max 5)
+ * - Add new profile (protected by Parental Gate)
+ * - Profile selection redirects to /game/categories
+ *
+ * User Story: US-002 (Select Child Profile)
+ * Related: US-003 (Create Child Profile)
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import ProfileManager from "@/components/ProfileManager";
+
+// Disable prerendering for this page (requires authentication)
+export const prerender = false;
+---
+
+<Layout title="Wybierz Profil - Dopasuj Obrazek do Słowa">
+  <main class="min-h-screen bg-gradient-to-b from-blue-100 to-purple-100 p-4 md:p-8">
+    <div class="mx-auto max-w-6xl">
+      <header class="mb-8 text-center">
+        <h1 class="mb-2 text-4xl font-bold text-purple-800 md:text-5xl">Kto dziś gra?</h1>
+        <p class="text-lg text-purple-600 md:text-xl">Wybierz swój profil, aby rozpocząć zabawę!</p>
+      </header>
+
+      <!-- React Island: Interactive profile management -->
+      <ProfileManager client:load />
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* Additional page-specific styles if needed */
+</style>

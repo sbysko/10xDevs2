@@ -1,27 +1,113 @@
 /**
- * POST /api/profiles - Create child profile
+ * /api/profiles - Child profile management endpoints
+ *
+ * GET /api/profiles - List all child profiles for authenticated parent
+ * POST /api/profiles - Create new child profile
  *
  * Documentation: .ai/create-profile-implementation-plan.md
  * User Story: US-003 (Create Child Profile)
  *
- * Request:
- * - Headers: Authorization: Bearer <jwt_token>
- * - Body: { display_name, avatar_url?, language_code? }
- *
- * Responses:
- * - 201 Created: Profile created successfully
- * - 400 Bad Request: Validation error
- * - 401 Unauthorized: Missing/invalid token
- * - 409 Conflict: Profile limit exceeded (max 5)
- * - 500 Internal Server Error: Unexpected error
+ * Security:
+ * - All endpoints require JWT authentication
+ * - RLS policies enforce parent_id = auth.uid()
  */
 
-import type { APIRoute } from 'astro';
-import { ProfileService } from '@/lib/services/profile.service';
-import { CreateProfileSchema } from '@/lib/validation/profile.schemas';
+import type { APIRoute } from "astro";
+import { ProfileService } from "@/lib/services/profile.service";
+import { CreateProfileSchema } from "@/lib/validation/profile.schemas";
 
 // IMPORTANT: Disable prerendering for API routes
 export const prerender = false;
+
+/**
+ * GET handler - List all child profiles for authenticated parent
+ *
+ * Flow:
+ * 1. Authenticate: Validate JWT from Authorization header
+ * 2. Fetch: Call ProfileService to get all profiles (RLS filtered by parent_id)
+ * 3. Return: 200 with array of profile DTOs
+ *
+ * Responses:
+ * - 200 OK: Array of profiles (can be empty array if no profiles)
+ * - 401 Unauthorized: Missing/invalid token
+ * - 500 Internal Server Error: Database error
+ */
+export const GET: APIRoute = async (context) => {
+  // ===================================================================
+  // STEP 1: AUTHENTICATION - Verify JWT token
+  // ===================================================================
+
+  const authHeader = context.request.headers.get("Authorization");
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return new Response(
+      JSON.stringify({
+        error: "unauthorized",
+        message: "Authentication required",
+      }),
+      {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  const {
+    data: { user },
+    error: authError,
+  } = await context.locals.supabase.auth.getUser();
+
+  if (authError || !user) {
+    console.error("Authentication failed:", authError?.message);
+
+    return new Response(
+      JSON.stringify({
+        error: "unauthorized",
+        message: "Invalid or expired token",
+      }),
+      {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  // ===================================================================
+  // STEP 2: FETCH PROFILES - Call service layer
+  // ===================================================================
+
+  const profileService = new ProfileService(context.locals.supabase);
+
+  try {
+    const profiles = await profileService.getAllProfiles(user.id);
+
+    // Success: Return 200 OK with profiles array
+    return new Response(JSON.stringify(profiles), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (dbError: unknown) {
+    const error = dbError as { message?: string; code?: string };
+
+    console.error("Database error in GET /api/profiles:", {
+      userId: user.id,
+      errorCode: error.code,
+      errorMessage: error.message,
+      timestamp: new Date().toISOString(),
+    });
+
+    return new Response(
+      JSON.stringify({
+        error: "internal_error",
+        message: "An unexpected error occurred. Please try again later.",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+};
 
 /**
  * POST handler - Create new child profile
@@ -44,18 +130,18 @@ export const POST: APIRoute = async (context) => {
   // STEP 1: AUTHENTICATION - Verify JWT token
   // ===================================================================
 
-  const authHeader = context.request.headers.get('Authorization');
+  const authHeader = context.request.headers.get("Authorization");
 
   // Check if Authorization header exists and has Bearer format
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return new Response(
       JSON.stringify({
-        error: 'unauthorized',
-        message: 'Authentication required'
+        error: "unauthorized",
+        message: "Authentication required",
       }),
       {
         status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -63,20 +149,20 @@ export const POST: APIRoute = async (context) => {
   // Verify JWT token with Supabase Auth
   const {
     data: { user },
-    error: authError
+    error: authError,
   } = await context.locals.supabase.auth.getUser();
 
   if (authError || !user) {
-    console.error('Authentication failed:', authError?.message);
+    console.error("Authentication failed:", authError?.message);
 
     return new Response(
       JSON.stringify({
-        error: 'unauthorized',
-        message: 'Invalid or expired token'
+        error: "unauthorized",
+        message: "Invalid or expired token",
       }),
       {
         status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -89,16 +175,16 @@ export const POST: APIRoute = async (context) => {
 
   try {
     requestBody = await context.request.json();
-  } catch (jsonError) {
+  } catch {
     return new Response(
       JSON.stringify({
-        error: 'validation_error',
-        message: 'Invalid JSON in request body',
-        field: 'body'
+        error: "validation_error",
+        message: "Invalid JSON in request body",
+        field: "body",
       }),
       {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -115,13 +201,13 @@ export const POST: APIRoute = async (context) => {
 
     return new Response(
       JSON.stringify({
-        error: 'validation_error',
+        error: "validation_error",
         message: firstError.message,
-        field: firstError.path.join('.') || 'unknown'
+        field: firstError.path.join(".") || "unknown",
       }),
       {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -136,15 +222,12 @@ export const POST: APIRoute = async (context) => {
 
   try {
     // Create profile with parent_id from JWT (security measure)
-    const newProfile = await profileService.createProfile(
-      user.id,
-      validatedData
-    );
+    const newProfile = await profileService.createProfile(user.id, validatedData);
 
     // Success: Return 201 Created with profile DTO
     return new Response(JSON.stringify(newProfile), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
   } catch (dbError: unknown) {
     // ===================================================================
@@ -156,63 +239,59 @@ export const POST: APIRoute = async (context) => {
     // Error 1: Profile limit exceeded (database trigger)
     // PostgreSQL error code P0001 = RAISE EXCEPTION
     // Trigger message: "Maksymalnie 5 profili dzieci na rodzica"
-    if (
-      error.code === 'P0001' ||
-      error.message?.toLowerCase().includes('maksymalnie 5 profili')
-    ) {
+    if (error.code === "P0001" || error.message?.toLowerCase().includes("maksymalnie 5 profili")) {
       return new Response(
         JSON.stringify({
-          error: 'profile_limit_exceeded',
-          message:
-            'Maximum number of profiles is 5. Please delete an existing profile first.',
+          error: "profile_limit_exceeded",
+          message: "Maximum number of profiles is 5. Please delete an existing profile first.",
           current_count: 5,
-          max_allowed: 5
+          max_allowed: 5,
         }),
         {
           status: 409,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Error 2: RLS policy violation (should NOT happen with correct implementation)
     // PostgreSQL error code 42501 = insufficient_privilege
-    if (error.code === '42501') {
-      console.error('CRITICAL: RLS policy violation in createProfile', {
+    if (error.code === "42501") {
+      console.error("CRITICAL: RLS policy violation in createProfile", {
         userId: user.id,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       return new Response(
         JSON.stringify({
-          error: 'forbidden',
-          message: 'Access denied'
+          error: "forbidden",
+          message: "Access denied",
         }),
         {
           status: 403,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Error 3: Generic database error
     // Log details for debugging, but return generic message to client
-    console.error('Database error in POST /api/profiles:', {
+    console.error("Database error in POST /api/profiles:", {
       userId: user.id,
       errorCode: error.code,
       errorMessage: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     return new Response(
       JSON.stringify({
-        error: 'internal_error',
-        message: 'An unexpected error occurred. Please try again later.'
+        error: "internal_error",
+        message: "An unexpected error occurred. Please try again later.",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }

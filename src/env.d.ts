@@ -13,6 +13,6 @@ interface ImportMeta {
 
 declare namespace App {
   interface Locals {
-    supabase: import('./db/supabase.client').SupabaseClient;
+    supabase: import("./db/supabase.client").SupabaseClient;
   }
 }

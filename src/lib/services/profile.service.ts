@@ -11,8 +11,8 @@
  * - RLS policies automatically enforce parent_id = auth.uid() at database level
  */
 
-import type { SupabaseClient } from '@/db/supabase.client';
-import type { CreateProfileCommand, ProfileDTO } from '@/types';
+import type { SupabaseClient } from "@/db/supabase.client";
+import type { CreateProfileCommand, ProfileDTO, CategoryProgressDTO, CategoryProgressItem } from "@/types";
 
 /**
  * Service for managing child profiles
@@ -45,24 +45,17 @@ export class ProfileService {
    * });
    * ```
    */
-  async createProfile(
-    parentId: string,
-    data: CreateProfileCommand
-  ): Promise<ProfileDTO> {
+  async createProfile(parentId: string, data: CreateProfileCommand): Promise<ProfileDTO> {
     // Prepare insert data with defaults
     const insertData = {
       parent_id: parentId, // From JWT, NOT from request body (security)
       display_name: data.display_name,
       avatar_url: data.avatar_url ?? null,
-      language_code: data.language_code ?? 'pl'
+      language_code: data.language_code ?? "pl",
     };
 
     // Execute INSERT with automatic RETURNING clause (single round-trip)
-    const { data: profile, error } = await this.supabase
-      .from('profiles')
-      .insert(insertData)
-      .select()
-      .single();
+    const { data: profile, error } = await this.supabase.from("profiles").insert(insertData).select().single();
 
     if (error) {
       // Re-throw error for API route to handle
@@ -74,7 +67,7 @@ export class ProfileService {
     }
 
     if (!profile) {
-      throw new Error('Profile created but not returned from database');
+      throw new Error("Profile created but not returned from database");
     }
 
     // Map database row to DTO (in this case it's 1:1 mapping)
@@ -85,8 +78,53 @@ export class ProfileService {
       avatar_url: profile.avatar_url,
       language_code: profile.language_code,
       created_at: profile.created_at,
-      updated_at: profile.updated_at
+      updated_at: profile.updated_at,
     };
+  }
+
+  /**
+   * Get all profiles for a parent
+   *
+   * Business rules:
+   * - Returns all child profiles for authenticated parent
+   * - RLS policies automatically filter by parent_id = auth.uid()
+   * - Results ordered by created_at DESC (newest first)
+   *
+   * @param parentId - UUID of authenticated parent from JWT token
+   * @returns Array of profile DTOs (max 5 profiles)
+   * @throws Error if database query fails
+   *
+   * @example
+   * ```typescript
+   * const service = new ProfileService(supabase);
+   * const profiles = await service.getAllProfiles(user.id);
+   * ```
+   */
+  async getAllProfiles(parentId: string): Promise<ProfileDTO[]> {
+    const { data: profiles, error } = await this.supabase
+      .from("profiles")
+      .select("*")
+      .eq("parent_id", parentId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!profiles) {
+      return [];
+    }
+
+    // Map database rows to DTOs
+    return profiles.map((profile) => ({
+      id: profile.id,
+      parent_id: profile.parent_id,
+      display_name: profile.display_name,
+      avatar_url: profile.avatar_url,
+      language_code: profile.language_code,
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
+    }));
   }
 
   /**
@@ -109,14 +147,111 @@ export class ProfileService {
    */
   async getProfileCount(parentId: string): Promise<number> {
     const { count, error } = await this.supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('parent_id', parentId);
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("parent_id", parentId);
 
     if (error) {
       throw error;
     }
 
     return count ?? 0;
+  }
+
+  /**
+   * Get category progress for a specific profile
+   *
+   * Calculates mastered words per category and overall progress
+   *
+   * @param profileId - UUID of child profile
+   * @param languageCode - Language filter (default: 'pl')
+   * @returns CategoryProgressDTO with per-category and overall progress
+   * @throws Error if database query fails
+   *
+   * @example
+   * ```typescript
+   * const progress = await service.getCategoryProgress(profileId, 'pl');
+   * // Returns: { profile_id, language, categories: [...], overall: {...} }
+   * ```
+   */
+  async getCategoryProgress(profileId: string, languageCode = "pl"): Promise<CategoryProgressDTO> {
+    // 1. Get all vocabulary words grouped by category
+    const { data: vocabData, error: vocabError } = await this.supabase
+      .from("vocabulary")
+      .select("id, category")
+      .eq("language_code", languageCode);
+
+    if (vocabError) {
+      throw vocabError;
+    }
+
+    if (!vocabData || vocabData.length === 0) {
+      // No vocabulary found - return empty progress
+      return {
+        profile_id: profileId,
+        language: languageCode,
+        categories: [],
+        overall: {
+          total_words: 0,
+          mastered_words: 0,
+          completion_percentage: 0,
+        },
+      };
+    }
+
+    // 2. Get mastered words for this profile
+    const { data: progressData, error: progressError } = await this.supabase
+      .from("user_progress")
+      .select("vocabulary_id, is_mastered")
+      .eq("profile_id", profileId)
+      .eq("is_mastered", true);
+
+    if (progressError) {
+      throw progressError;
+    }
+
+    const masteredIds = new Set((progressData || []).map((p) => p.vocabulary_id));
+
+    // 3. Group vocabulary by category and calculate progress
+    const categoryMap = new Map<string, { total: number; mastered: number }>();
+
+    vocabData.forEach((word) => {
+      const category = word.category;
+      const isMastered = masteredIds.has(word.id);
+
+      if (!categoryMap.has(category)) {
+        categoryMap.set(category, { total: 0, mastered: 0 });
+      }
+
+      const stats = categoryMap.get(category)!;
+      stats.total += 1;
+      if (isMastered) {
+        stats.mastered += 1;
+      }
+    });
+
+    // 4. Build CategoryProgressItem array
+    const categories: CategoryProgressItem[] = Array.from(categoryMap.entries()).map(([category, stats]) => ({
+      category: category as any, // vocabulary_category enum
+      total_words: stats.total,
+      mastered_words: stats.mastered,
+      completion_percentage: stats.total > 0 ? (stats.mastered / stats.total) * 100 : 0,
+    }));
+
+    // 5. Calculate overall progress
+    const total_words = vocabData.length;
+    const mastered_words = masteredIds.size;
+    const completion_percentage = total_words > 0 ? (mastered_words / total_words) * 100 : 0;
+
+    return {
+      profile_id: profileId,
+      language: languageCode,
+      categories,
+      overall: {
+        total_words,
+        mastered_words,
+        completion_percentage,
+      },
+    };
   }
 }

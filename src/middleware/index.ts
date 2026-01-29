@@ -18,9 +18,9 @@
  * ```
  */
 
-import { createServerClient } from '@supabase/ssr';
-import { defineMiddleware } from 'astro:middleware';
-import type { SupabaseClient } from '@/db/supabase.client';
+import { createServerClient } from "@supabase/ssr";
+import { defineMiddleware } from "astro:middleware";
+import type { SupabaseClient } from "@/db/supabase.client";
 
 /**
  * Middleware to initialize Supabase client for each request
@@ -37,10 +37,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const supabaseKey = import.meta.env.SUPABASE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error('Missing Supabase environment variables');
-    throw new Error(
-      'SUPABASE_URL and SUPABASE_KEY must be set in environment variables'
-    );
+    console.error("Missing Supabase environment variables");
+    throw new Error("SUPABASE_URL and SUPABASE_KEY must be set in environment variables");
   }
 
   /**
@@ -76,14 +74,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
        */
       remove(key: string, options: any) {
         context.cookies.delete(key, options);
-      }
+      },
     },
     // Pass Authorization header to Supabase for Bearer token authentication
     global: {
       headers: {
-        Authorization: context.request.headers.get('Authorization') || ''
-      }
-    }
+        Authorization: context.request.headers.get("Authorization") || "",
+      },
+    },
   });
 
   // Attach Supabase client to context.locals for use in routes

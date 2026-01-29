@@ -1,0 +1,40 @@
+---
+/**
+ * /progress - Progress Statistics Page
+ *
+ * This page displays progress statistics for a selected profile.
+ * Shows key metrics, category breakdown, and mastered words list.
+ *
+ * Features:
+ * - Profile selector (if multiple profiles)
+ * - 4 key statistics cards
+ * - Category progress chart
+ * - Mastered words grid
+ * - Empty state for new profiles
+ *
+ * User Story: US-007 (View Progress Statistics)
+ *
+ * URL: /progress?profileId=<uuid> (optional)
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import ProgressDashboard from "@/components/ProgressDashboard";
+
+// Disable prerendering for this page (requires session data)
+export const prerender = false;
+
+// Extract profileId from URL query params
+const url = new URL(Astro.request.url);
+const profileId = url.searchParams.get("profileId");
+---
+
+<Layout title="Statystyki - Dopasuj Obrazek do Słowa">
+  <main class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-8">
+    <!-- React Island: Interactive progress dashboard -->
+    <ProgressDashboard client:load initialProfileId={profileId} />
+  </main>
+</Layout>
+
+<style>
+  /* Additional page-specific styles if needed */
+</style>

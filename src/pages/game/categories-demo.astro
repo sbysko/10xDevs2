@@ -1,0 +1,228 @@
+---
+/**
+ * Category Selection Demo Page
+ *
+ * /game/categories-demo
+ *
+ * Demo page for testing category selection UI without backend
+ *
+ * Features:
+ * - Mock data for categories and progress
+ * - All UI components visible
+ * - No API calls required
+ * - Perfect for visual testing
+ */
+
+import Layout from "@/layouts/Layout.astro";
+
+// Disable prerendering
+export const prerender = false;
+---
+
+<Layout title="Wybór Kategorii - Demo">
+  <div class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-8">
+    <div class="container mx-auto px-4">
+      <!-- Demo Banner -->
+      <div class="mb-6 rounded-lg bg-yellow-50 border-2 border-yellow-300 p-4 text-center">
+        <p class="text-lg font-semibold text-yellow-800">
+          📋 Strona Demo - Testowanie UI bez backendu
+        </p>
+        <p class="text-sm text-yellow-700 mt-2">
+          To jest strona testowa pokazująca wszystkie komponenty widoku kategorii.
+          API nie jest wymagane - używamy mock data.
+        </p>
+      </div>
+
+      <!-- Profile Header Mock -->
+      <div class="mb-8 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="h-12 w-12 overflow-hidden rounded-full bg-white shadow-md">
+            <img
+              src="/avatars/avatar-1.svg"
+              alt="Avatar Zosia"
+              class="h-full w-full object-cover"
+            />
+          </div>
+          <div>
+            <p class="text-sm font-medium text-purple-600">Grasz jako:</p>
+            <h2 class="text-xl font-bold text-purple-800">Zosia</h2>
+          </div>
+        </div>
+        <button
+          class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-purple-600 shadow-md transition-all hover:bg-purple-50 hover:shadow-lg"
+          onclick="alert('Przekierowanie do /profiles')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          <span class="hidden sm:inline">Zmień profil</span>
+        </button>
+      </div>
+
+      <!-- Title -->
+      <div class="mb-6 text-center">
+        <h1 class="mb-2 text-4xl font-bold text-purple-800 md:text-5xl">Wybierz kategorię</h1>
+        <p class="text-lg text-purple-600">Która kategoria Cię dziś interesuje?</p>
+      </div>
+
+      <!-- Categories Grid -->
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <!-- Category 1: Zwierzęta -->
+        <button
+          class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-400 to-teal-400 p-6 shadow-lg transition-all duration-200 hover:from-green-500 hover:to-teal-500 hover:scale-105 hover:shadow-xl active:scale-95"
+          onclick="alert('Wybrano: Zwierzęta → /game/session?category=zwierzeta')"
+        >
+          <div class="flex flex-col items-center gap-4">
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
+              🐾
+            </div>
+            <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Zwierzęta</h3>
+            <div class="w-full space-y-2">
+              <p class="text-center text-lg font-semibold text-white">12/50</p>
+              <div class="h-3 w-full overflow-hidden rounded-full bg-white bg-opacity-30">
+                <div class="h-full rounded-full bg-white transition-all duration-500" style="width: 24%"></div>
+              </div>
+              <p class="text-center text-sm font-medium text-white opacity-90">24% opanowane</p>
+            </div>
+          </div>
+          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+            <div class="absolute inset-0 bg-white"></div>
+          </div>
+        </button>
+
+        <!-- Category 2: Owoce i Warzywa -->
+        <button
+          class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-400 p-6 shadow-lg transition-all duration-200 hover:from-yellow-500 hover:to-orange-500 hover:scale-105 hover:shadow-xl active:scale-95"
+          onclick="alert('Wybrano: Owoce i Warzywa')"
+        >
+          <div class="flex flex-col items-center gap-4">
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
+              🍎
+            </div>
+            <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Owoce i Warzywa</h3>
+            <div class="w-full space-y-2">
+              <p class="text-center text-lg font-semibold text-white">35/50</p>
+              <div class="h-3 w-full overflow-hidden rounded-full bg-white bg-opacity-30">
+                <div class="h-full rounded-full bg-white transition-all duration-500" style="width: 70%"></div>
+              </div>
+              <p class="text-center text-sm font-medium text-white opacity-90">70% opanowane</p>
+            </div>
+          </div>
+          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+            <div class="absolute inset-0 bg-white"></div>
+          </div>
+        </button>
+
+        <!-- Category 3: Pojazdy -->
+        <button
+          class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-400 p-6 shadow-lg transition-all duration-200 hover:from-blue-500 hover:to-indigo-500 hover:scale-105 hover:shadow-xl active:scale-95"
+          onclick="alert('Wybrano: Pojazdy')"
+        >
+          <div class="flex flex-col items-center gap-4">
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
+              🚗
+            </div>
+            <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Pojazdy</h3>
+            <div class="w-full space-y-2">
+              <p class="text-center text-lg font-semibold text-white">0/50</p>
+              <div class="h-3 w-full overflow-hidden rounded-full bg-white bg-opacity-30">
+                <div class="h-full rounded-full bg-white transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <p class="text-center text-sm font-medium text-white opacity-90">0% opanowane</p>
+            </div>
+          </div>
+          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+            <div class="absolute inset-0 bg-white"></div>
+          </div>
+        </button>
+
+        <!-- Category 4: Kolory i Kształty -->
+        <button
+          class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-400 to-purple-400 p-6 shadow-lg transition-all duration-200 hover:from-pink-500 hover:to-purple-500 hover:scale-105 hover:shadow-xl active:scale-95"
+          onclick="alert('Wybrano: Kolory i Kształty')"
+        >
+          <div class="flex flex-col items-center gap-4">
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
+              🎨
+            </div>
+            <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Kolory i Kształty</h3>
+            <div class="w-full space-y-2">
+              <p class="text-center text-lg font-semibold text-white">50/50</p>
+              <div class="h-3 w-full overflow-hidden rounded-full bg-white bg-opacity-30">
+                <div class="h-full rounded-full bg-white transition-all duration-500" style="width: 100%"></div>
+              </div>
+              <p class="text-center text-sm font-medium text-white opacity-90">100% opanowane</p>
+            </div>
+          </div>
+          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+            <div class="absolute inset-0 bg-white"></div>
+          </div>
+        </button>
+
+        <!-- Category 5: Przedmioty Codzienne -->
+        <button
+          class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-400 to-slate-400 p-6 shadow-lg transition-all duration-200 hover:from-gray-500 hover:to-slate-500 hover:scale-105 hover:shadow-xl active:scale-95"
+          onclick="alert('Wybrano: Przedmioty Codzienne')"
+        >
+          <div class="flex flex-col items-center gap-4">
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
+              🏠
+            </div>
+            <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Przedmioty Codzienne</h3>
+            <div class="w-full space-y-2">
+              <p class="text-center text-lg font-semibold text-white">8/50</p>
+              <div class="h-3 w-full overflow-hidden rounded-full bg-white bg-opacity-30">
+                <div class="h-full rounded-full bg-white transition-all duration-500" style="width: 16%"></div>
+              </div>
+              <p class="text-center text-sm font-medium text-white opacity-90">16% opanowane</p>
+            </div>
+          </div>
+          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+            <div class="absolute inset-0 bg-white"></div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Overall Progress -->
+      <div class="mt-8 rounded-lg bg-white p-6 shadow-md">
+        <h3 class="mb-2 text-lg font-semibold text-gray-800">Całkowity postęp</h3>
+        <div class="flex items-center gap-4">
+          <div class="text-3xl font-bold text-purple-600">105/250</div>
+          <div class="flex-1">
+            <div class="h-4 overflow-hidden rounded-full bg-gray-200">
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-500"
+                style="width: 42%"
+              ></div>
+            </div>
+          </div>
+          <div class="text-lg font-semibold text-gray-600">42%</div>
+        </div>
+      </div>
+
+      <!-- Testing Notes -->
+      <div class="mt-8 rounded-lg bg-white p-6 shadow-md">
+        <h3 class="mb-4 text-xl font-bold text-gray-800">📋 Instrukcje testowania:</h3>
+        <ul class="space-y-2 text-gray-700">
+          <li>✅ <strong>Responsywność:</strong> Zmień rozmiar okna (mobile/tablet/desktop)</li>
+          <li>✅ <strong>Hover efekty:</strong> Najedź na karty - zobacz scale + glow</li>
+          <li>✅ <strong>Active efekt:</strong> Kliknij kartę - zobacz scale-down</li>
+          <li>✅ <strong>Kolory:</strong> Każda kategoria ma unikalny gradient</li>
+          <li>✅ <strong>Ikony:</strong> Emoji 64px z animacją</li>
+          <li>✅ <strong>Postęp:</strong> Różne poziomy (0%, 24%, 70%, 100%)</li>
+          <li>✅ <strong>Accessibility:</strong> Użyj Tab + Enter do nawigacji</li>
+        </ul>
+
+        <div class="mt-6 rounded-md bg-blue-50 p-4">
+          <p class="text-sm font-semibold text-blue-800">Aby przetestować z prawdziwymi danymi:</p>
+          <ol class="ml-4 mt-2 list-decimal space-y-1 text-sm text-blue-700">
+            <li>Uruchom Docker Desktop</li>
+            <li>Uruchom Supabase: <code class="rounded bg-blue-100 px-1">npx supabase start</code></li>
+            <li>Wgraj dane: <code class="rounded bg-blue-100 px-1">psql ... -f scripts/seed-vocabulary.sql</code></li>
+            <li>Przejdź do: <a href="/game/categories" class="underline">/game/categories</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

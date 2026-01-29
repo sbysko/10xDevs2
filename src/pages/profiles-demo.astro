@@ -1,0 +1,58 @@
+---
+/**
+ * Demo page for testing ProfileManager component
+ * This page shows how the profiles view looks with mock data
+ *
+ * To view: http://localhost:3000/profiles-demo
+ */
+import Layout from "@/layouts/Layout.astro";
+import ProfileManager from "@/components/ProfileManager";
+
+// Disable prerendering for this page
+export const prerender = false;
+---
+
+<Layout title="Profile Manager Demo - Dopasuj Obrazek do Słowa">
+  <div class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-8">
+    <div class="container mx-auto px-4">
+      <!-- Header -->
+      <div class="mb-8 text-center">
+        <h1 class="mb-2 text-4xl font-bold text-purple-800 md:text-5xl">
+          Kto dziś gra? 🎮
+        </h1>
+        <p class="text-lg text-purple-600 md:text-xl">
+          Wybierz swój profil lub dodaj nowy
+        </p>
+        <p class="mt-4 text-sm text-gray-600">
+          ℹ️ To jest strona demo do testowania UI. Backend nie jest wymagany.
+        </p>
+      </div>
+
+      <!-- Profile Manager Component -->
+      <ProfileManager client:load />
+
+      <!-- Demo Notes -->
+      <div class="mx-auto mt-8 max-w-2xl rounded-lg bg-white p-6 shadow-md">
+        <h2 class="mb-4 text-xl font-bold text-gray-800">Instrukcje testowania:</h2>
+        <ul class="space-y-2 text-gray-700">
+          <li>✅ <strong>Awatary:</strong> 8 kolorowych awatarów SVG ze zwierzętami</li>
+          <li>✅ <strong>Responsywność:</strong> Zmień rozmiar okna, aby sprawdzić grid (1-3 kolumny)</li>
+          <li>✅ <strong>Parental Gate:</strong> Kliknij "Dodaj profil" i rozwiąż zadanie matematyczne</li>
+          <li>✅ <strong>Animacje:</strong> Najedź na karty, aby zobaczyć efekty hover</li>
+          <li>⚠️ <strong>API:</strong> Bez działającego backendu, operacje CRUD nie będą działać</li>
+        </ul>
+
+        <div class="mt-6 rounded-md bg-yellow-50 p-4">
+          <p class="text-sm text-yellow-800">
+            <strong>Aby przetestować z prawdziwymi danymi:</strong>
+          </p>
+          <ol class="ml-4 mt-2 list-decimal space-y-1 text-sm text-yellow-700">
+            <li>Uruchom Docker Desktop</li>
+            <li>Uruchom lokalny Supabase: <code class="rounded bg-yellow-100 px-1">npx supabase start</code></li>
+            <li>Przejdź do: <a href="/profiles" class="underline">/profiles</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

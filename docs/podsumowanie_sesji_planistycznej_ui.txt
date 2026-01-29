@@ -1,0 +1,54 @@
+<conversation_summary>
+<decisions>
+
+1. **Podział Architektoniczny**: Zastosowanie Astro 5 z architekturą "Islands" – SSR dla panelu rodzica (bezpieczeństwo) i CSR (React 19) dla interaktywnej gry.
+2. **System Motywacyjny**: Wykorzystanie wizualnych nagród w postaci animowanego konfetti, ikony "kciuka w górę" oraz widocznych pustych slotów na gwiazdki (progress tracking).
+3. **Komunikacja Głosowa**: Wprowadzenie lektora czytającego słowa, przy jednoczesnym ograniczeniu innych zbędnych sygnałów dźwiękowych.
+4. **Bariery Bezpieczeństwa (Parental Gate)**: Zastosowanie zadań matematycznych jako blokady dostępu do ustawień profilu oraz zabezpieczenie przed przypadkowym wyjściem z gry.
+5. **Nawigacja bez tekstu**: Opisanie kategorii i profili za pomocą dużych, intuicyjnych ikon i obrazków, aby umożliwić obsługę dzieciom nieumiejącym czytać.
+6. **Obsługa błędów**: Rezygnacja z negatywnych symboli (np. "X") na rzecz animacji potrząsania (shake) i możliwości natychmiastowej poprawy.
+7. **Responsywność**: Ustalenie sztywnego formatu proporcji (16:9) w układzie poziomym, aby zapewnić stałą widoczność 4 elementów interaktywnych.
+8. **Interakcje**: Minimalny rozmiar elementów klikalnych ustalony na 80x80px dla ułatwienia obsługi na urządzeniach dotykowych.
+
+</decisions>
+
+<matched_recommendations>
+
+1. **Wydajność (LCP < 2s)**: Wykorzystanie Astro do optymalizacji ładowania obrazków z Supabase Storage oraz minimalizacji JS w strefie rodzica.
+2. **Visual Feedback Loop**: Połączenie sukcesu w API (`POST /api/progress`) z natychmiastową gratyfikacją wizualną (konfetti/animacja gwiazdek).
+3. **Smart Word Selection**: Implementacja front-endowa logiki wybierającej 4 obrazy (1 poprawny, 3 dystraktory) na podstawie danych z endpointu `/api/game-sessions/start`.
+4. **Optimistic UI**: Zarządzanie stanem postępu w taki sposób, by gra toczyła się płynnie nawet przy krótkotrwałych opóźnieniach w odpowiedziach API.
+5. **Dostępność i Inkluzywność**: Zastosowanie bezszeryfowych, dużych fontów wspierających naukę czytania oraz rezygnacja z instrukcji tekstowych w interfejsie dziecka.
+</matched_recommendations>
+
+<ui_architecture_planning_summary>
+
+### Główne wymagania dotyczące architektury UI
+
+Projekt zakłada stworzenie hybrydowej aplikacji webowej (Mobile-First), która jest podzielona na dwie główne sfery. Sfera rodzica skupia się na bezpieczeństwie i analityce, natomiast sfera dziecka na wydajnej, bezstresowej nauce. Kluczowym wskaźnikiem jest szybkość ładowania obrazków AI (250 sztuk), co zostanie rozwiązane przez automatyczną optymalizację formatów (WebP/AVIF).
+
+### Kluczowe widoki i przepływy
+
+* **Ekran Wyboru Profilu**: Wizualna galeria (Avatary) pobierana z `/api/profiles`.
+* **Dashboard Rodzica**: Wykorzystanie komponentów Shadcn/UI do wizualizacji statystyk postępu dziecka (widok `profile_stats`).
+* **Widok Gry**: Stały układ 16:9 z centralnie umieszczonym słowem, paskiem postępu "ścieżką" oraz czterema dużymi polami wyboru obrazka.
+* **Parental Gate**: Modal z zadaniem matematycznym aktywowany przy próbie zmiany konfiguracji lub wyjścia do panelu zarządzania.
+
+### Integracja z API i zarządzanie stanem
+
+* **Autoryzacja**: Supabase Auth zintegrowany z middleware Astro dla ochrony ścieżek `/dashboard`.
+* **Stan Gry**: Lokalny stan React 19 zarządzający aktualną sesją, zsynchronizowany z bazą danych poprzez endpointy `/api/progress`.
+* **Optymalizacja**: Agresywne buforowanie obrazków i asynchroniczne ładowanie lektora (audio) dla zapewnienia płynności animacji.
+
+### Responsywność, dostępność i bezpieczeństwo
+
+Aplikacja będzie w pełni responsywna, z priorytetem dla tabletów w orientacji poziomej. Dostępność zostanie zapewniona poprzez wyeliminowanie konieczności czytania w sekcjach dla dzieci oraz zastosowanie wysokiego kontrastu. Bezpieczeństwo danych gwarantuje Row Level Security (RLS) na poziomie bazy Supabase.
+</ui_architecture_planning_summary>
+
+<unresolved_issues>
+
+1. **Technologia Lektora**: Należy doprecyzować, czy głos lektora będzie generowany w czasie rzeczywistym (Speech Synthesis API), czy będą to gotowe pliki audio hostowane w Supabase Storage (co wpłynie na czas ładowania).
+2. **Złożoność zadań matematycznych**: Należy ustalić zakres trudności zadań (np. tylko dodawanie do 20), aby upewnić się, że żaden rodzic nie będzie miał problemu z dostępem.
+3. **Offline Mode**: Czy system powinien pozwalać na dokończenie sesji gry całkowicie bez sieci, czy tylko obsługiwać krótkie przerwy w połączeniu (retry policy dla API).
+</unresolved_issues>
+</conversation_summary>

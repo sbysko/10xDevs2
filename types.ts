@@ -1,30 +1,24 @@
 /**
  * DTO (Data Transfer Object) and Command Model Type Definitions
- * 
+ *
  * This file contains all TypeScript type definitions for API request/response objects
  * derived from database entities and API specifications.
- * 
+ *
  * Database source: database_types.ts
  * API specification: api-plan.md
  */
 
-import type { Database } from './database_types';
+import type { Database } from "./database_types";
 
 // ============================================================================
 // BASE DATABASE TYPE UTILITIES
 // ============================================================================
 
-/** Type alias for database Tables for easier access */
-type Tables = Database['public']['Tables'];
-
-/** Type alias for database Views for easier access */
-type Views = Database['public']['Views'];
-
 /** Type alias for database Enums for easier access */
-type Enums = Database['public']['Enums'];
+type Enums = Database["public"]["Enums"];
 
 /** Type alias for vocabulary category enum */
-type VocabularyCategory = Enums['vocabulary_category'];
+type VocabularyCategory = Enums["vocabulary_category"];
 
 // ============================================================================
 // COMMON UTILITY TYPES
@@ -103,7 +97,7 @@ export interface ProfilesListDTO {
  * Used when profile creation limit is exceeded (409)
  */
 export interface ProfileLimitErrorDTO extends ErrorResponse {
-  error: 'profile_limit_exceeded';
+  error: "profile_limit_exceeded";
   current_count: number;
   max_allowed: number;
 }
@@ -113,7 +107,7 @@ export interface ProfileLimitErrorDTO extends ErrorResponse {
  * Used when attempting to delete the last profile (409)
  */
 export interface LastProfileErrorDTO extends ErrorResponse {
-  error: 'last_profile';
+  error: "last_profile";
   remaining_profiles: number;
 }
 
@@ -300,7 +294,7 @@ export interface GameSessionDTO {
  * Used when not enough words are available for game session (422)
  */
 export interface InsufficientWordsErrorDTO extends ErrorResponse {
-  error: 'insufficient_words';
+  error: "insufficient_words";
   available: number;
   requested: number;
 }
@@ -351,7 +345,7 @@ export interface ProgressRecordDTO {
  */
 export interface BatchProgressResultItem {
   vocabulary_id: string;
-  status: 'success' | 'error';
+  status: "success" | "error";
   stars_earned: number;
   is_mastered: boolean;
   error_message?: string;
@@ -394,7 +388,7 @@ export interface BatchProgressResponseDTO {
  * Used for 400 Bad Request errors with field-specific validation issues
  */
 export interface ValidationErrorDTO extends ErrorResponse {
-  error: 'validation_error';
+  error: "validation_error";
   field: string;
 }
 
@@ -403,7 +397,7 @@ export interface ValidationErrorDTO extends ErrorResponse {
  * Used for 404 Not Found errors
  */
 export interface NotFoundErrorDTO extends ErrorResponse {
-  error: 'not_found';
+  error: "not_found";
 }
 
 /**
@@ -411,7 +405,7 @@ export interface NotFoundErrorDTO extends ErrorResponse {
  * Used for 401 Unauthorized errors
  */
 export interface UnauthorizedErrorDTO extends ErrorResponse {
-  error: 'unauthorized';
+  error: "unauthorized";
 }
 
 // ============================================================================
@@ -464,26 +458,26 @@ export interface CategoriesQueryParams {
  * Type guard to check if an error is a ProfileLimitErrorDTO
  */
 export function isProfileLimitError(error: ErrorResponse): error is ProfileLimitErrorDTO {
-  return error.error === 'profile_limit_exceeded';
+  return error.error === "profile_limit_exceeded";
 }
 
 /**
  * Type guard to check if an error is a LastProfileErrorDTO
  */
 export function isLastProfileError(error: ErrorResponse): error is LastProfileErrorDTO {
-  return error.error === 'last_profile';
+  return error.error === "last_profile";
 }
 
 /**
  * Type guard to check if an error is a ValidationErrorDTO
  */
 export function isValidationError(error: ErrorResponse): error is ValidationErrorDTO {
-  return error.error === 'validation_error';
+  return error.error === "validation_error";
 }
 
 /**
  * Type guard to check if an error is an InsufficientWordsErrorDTO
  */
 export function isInsufficientWordsError(error: ErrorResponse): error is InsufficientWordsErrorDTO {
-  return error.error === 'insufficient_words';
+  return error.error === "insufficient_words";
 }

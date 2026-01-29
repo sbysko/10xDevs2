@@ -1,0 +1,42 @@
+---
+/**
+ * /game/session - Game Session Page
+ *
+ * This page starts a new game session with selected profile and category.
+ * Displays 10 questions using 80/20 algorithm (unmastered + mastered words).
+ *
+ * Features:
+ * - Load profile ID from sessionStorage (client-side)
+ * - Extract category from URL query param
+ * - Create session via POST /api/game/sessions
+ * - Display questions with 3 answer options each
+ * - Track progress and save at session end
+ *
+ * User Story: US-004 (Start Game Session)
+ * Related: US-005 (Play Game), US-006 (Track Progress)
+ *
+ * URL: /game/session?category=zwierzeta
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import GameSessionManager from "@/components/GameSessionManager";
+
+// Disable prerendering for this page (requires session data)
+export const prerender = false;
+
+// Extract category from URL query params
+const url = new URL(Astro.request.url);
+const category = url.searchParams.get("category");
+---
+
+<Layout title="Gra - Dopasuj Obrazek do Słowa">
+  <main class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-8">
+    <!-- React Island: Interactive game session -->
+    <!-- ProfileId retrieved from sessionStorage inside component -->
+    <GameSessionManager client:load category={category} />
+  </main>
+</Layout>
+
+<style>
+  /* Additional page-specific styles if needed */
+</style>

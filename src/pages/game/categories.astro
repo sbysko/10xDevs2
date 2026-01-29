@@ -1,0 +1,36 @@
+---
+/**
+ * Category Selection Page
+ *
+ * /game/categories
+ *
+ * Allows child to select a vocabulary category to practice
+ *
+ * Features:
+ * - Displays 5 vocabulary categories
+ * - Shows progress per category
+ * - Large, colorful, interactive cards
+ * - Requires selected profile in sessionStorage
+ *
+ * Flow:
+ * 1. Validate selectedProfileId from sessionStorage
+ * 2. Fetch categories and progress
+ * 3. Display CategoryDashboard with cards
+ * 4. On category click → Navigate to /game/session?category=<code>
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import CategoryDashboard from "@/components/CategoryDashboard";
+
+// Disable prerendering (requires sessionStorage check)
+export const prerender = false;
+---
+
+<Layout title="Wybierz kategorię - Dopasuj Obrazek do Słowa">
+  <div class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-8">
+    <div class="container mx-auto px-4">
+      <!-- Category Dashboard (React Island) -->
+      <CategoryDashboard client:load />
+    </div>
+  </div>
+</Layout>

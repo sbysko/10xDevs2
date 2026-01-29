@@ -11,7 +11,7 @@
  * - Avatar URL pattern prevents path traversal attacks
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Validation schema for creating a child profile
@@ -50,33 +50,27 @@ export const CreateProfileSchema = z.object({
    */
   display_name: z
     .string({
-      required_error: 'Display name is required',
-      invalid_type_error: 'Display name must be a string'
+      required_error: "Display name is required",
+      invalid_type_error: "Display name must be a string",
     })
-    .min(2, 'Display name must be at least 2 characters')
-    .max(50, 'Display name must be at most 50 characters')
-    .regex(
-      /^[\p{L}\s]+$/u,
-      'Display name must contain only letters and spaces'
-    ),
+    .min(2, "Display name must be at least 2 characters")
+    .max(50, "Display name must be at most 50 characters")
+    .regex(/^[\p{L}\s]+$/u, "Display name must contain only letters and spaces"),
 
   /**
    * Avatar URL - pre-defined avatar selection (8 options)
    *
    * Rules:
    * - Optional field
-   * - Must match pattern "avatars/avatar-[1-8].png"
+   * - Must match pattern "avatars/avatar-[1-8].svg"
    * - Can be null or undefined (no avatar selected)
    *
-   * Valid examples: "avatars/avatar-1.png", "avatars/avatar-8.png", null
-   * Invalid: "avatars/avatar-9.png", "custom/avatar.png", "../../../etc/passwd"
+   * Valid examples: "avatars/avatar-1.svg", "avatars/avatar-8.svg", null
+   * Invalid: "avatars/avatar-9.svg", "custom/avatar.svg", "../../../etc/passwd"
    */
   avatar_url: z
     .string()
-    .regex(
-      /^avatars\/avatar-[1-8]\.png$/,
-      'Avatar must be one of the predefined options (avatar-1 to avatar-8)'
-    )
+    .regex(/^avatars\/avatar-[1-8]\.svg$/, "Avatar must be one of the predefined options (avatar-1 to avatar-8)")
     .nullable()
     .optional(),
 
@@ -92,11 +86,11 @@ export const CreateProfileSchema = z.object({
    * Invalid: "de", "fr", "es"
    */
   language_code: z
-    .enum(['pl', 'en'], {
-      errorMap: () => ({ message: "Language must be 'pl' or 'en'" })
+    .enum(["pl", "en"], {
+      errorMap: () => ({ message: "Language must be 'pl' or 'en'" }),
     })
-    .default('pl')
-    .optional()
+    .default("pl")
+    .optional(),
 });
 
 /**

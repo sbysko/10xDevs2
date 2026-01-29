@@ -5,8 +5,8 @@
  * Use this type instead of importing from @supabase/supabase-js directly.
  */
 
-import type { SupabaseClient as SupabaseClientBase } from '@supabase/supabase-js';
-import type { Database } from './database.types';
+import type { SupabaseClient as SupabaseClientBase } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
 /**
  * Typed Supabase client with database schema
