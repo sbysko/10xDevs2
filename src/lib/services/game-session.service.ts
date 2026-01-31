@@ -205,7 +205,11 @@ export class GameSessionService {
 
     // MVP: Use Lorem Picsum placeholder
     // Extract word name from path for consistent image
-    const wordName = imagePath.split("/").pop()?.replace(/\.(jpg|png|svg)$/, "") || "default";
+    const wordName =
+      imagePath
+        .split("/")
+        .pop()
+        ?.replace(/\.(jpg|png|svg)$/, "") || "default";
     const seed = this.hashCode(wordName); // Consistent seed for same word
 
     return `https://picsum.photos/seed/${seed}/400/300`;

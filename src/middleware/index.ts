@@ -23,13 +23,24 @@ import { defineMiddleware } from "astro:middleware";
 import type { SupabaseClient } from "@/db/supabase.client";
 
 /**
- * Middleware to initialize Supabase client for each request
+ * Public routes that don't require authentication
+ */
+const PUBLIC_ROUTES = ["/login", "/register"];
+
+/**
+ * Routes that should redirect to /profiles if user is authenticated
+ */
+const AUTH_ROUTES = ["/login", "/register"];
+
+/**
+ * Middleware to initialize Supabase client and handle authentication
  *
  * Flow:
  * 1. Extract SUPABASE_URL and SUPABASE_KEY from environment
  * 2. Create server-side Supabase client with cookie handling
  * 3. Attach client to context.locals.supabase
- * 4. Continue to next middleware/route handler
+ * 4. Check authentication for protected routes
+ * 5. Continue to next middleware/route handler
  */
 export const onRequest = defineMiddleware(async (context, next) => {
   // Get Supabase configuration from environment variables
@@ -64,7 +75,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
        * Set cookie with options
        * Used for storing session tokens
        */
-      set(key: string, value: string, options: any) {
+      set(key: string, value: string, options: Record<string, unknown>) {
         context.cookies.set(key, value, options);
       },
 
@@ -72,7 +83,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
        * Remove cookie by name
        * Used for logout/session cleanup
        */
-      remove(key: string, options: any) {
+      remove(key: string, options: Record<string, unknown>) {
         context.cookies.delete(key, options);
       },
     },
@@ -86,6 +97,43 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Attach Supabase client to context.locals for use in routes
   context.locals.supabase = supabase as SupabaseClient;
+
+  // Get current pathname
+  const pathname = new URL(context.request.url).pathname;
+
+  // Skip auth check for API routes (they handle their own auth)
+  if (pathname.startsWith("/api/")) {
+    return next();
+  }
+
+  // Skip auth check for static assets
+  if (pathname.startsWith("/_") || pathname.includes(".")) {
+    return next();
+  }
+
+  // Check if route is public
+  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname === route);
+
+  // Get user session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // If user is authenticated and trying to access auth routes (login/register)
+  // Redirect to profiles page
+  if (session && AUTH_ROUTES.includes(pathname)) {
+    return context.redirect("/profiles");
+  }
+
+  // If user is not authenticated and trying to access protected route
+  // Redirect to login with redirect query param
+  if (!session && !isPublicRoute) {
+    const redirectUrl = new URL("/login", context.url.origin);
+    if (pathname !== "/") {
+      redirectUrl.searchParams.set("redirect", pathname);
+    }
+    return context.redirect(redirectUrl.toString());
+  }
 
   // Continue to next middleware or route handler
   return next();

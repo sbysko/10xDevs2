@@ -11,8 +11,7 @@
  * - RLS policies enforce profile ownership (profile.parent_id = auth.uid())
  */
 
-import type { APIRoute} from "astro";
-import { ProfileService } from "@/lib/services/profile.service";
+import type { APIRoute } from "astro";
 
 // IMPORTANT: Disable prerendering for API routes
 export const prerender = false;

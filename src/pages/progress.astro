@@ -19,6 +19,7 @@
 
 import Layout from "@/layouts/Layout.astro";
 import ProgressDashboard from "@/components/ProgressDashboard";
+import AppHeader from "@/components/AppHeader";
 
 // Disable prerendering for this page (requires session data)
 export const prerender = false;
@@ -29,6 +30,9 @@ const profileId = url.searchParams.get("profileId");
 ---
 
 <Layout title="Statystyki - Dopasuj Obrazek do Słowa">
+  <!-- App Header with logout button -->
+  <AppHeader client:load />
+
   <main class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-8">
     <!-- React Island: Interactive progress dashboard -->
     <ProgressDashboard client:load initialProfileId={profileId} />

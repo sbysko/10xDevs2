@@ -21,9 +21,7 @@ export const prerender = false;
  * Query parameters schema
  */
 const QueryParamsSchema = z.object({
-  category: z
-    .enum(["zwierzeta", "owoce_warzywa", "pojazdy", "kolory_ksztalty", "przedmioty_codzienne"])
-    .optional(),
+  category: z.enum(["zwierzeta", "owoce_warzywa", "pojazdy", "kolory_ksztalty", "przedmioty_codzienne"]).optional(),
   is_mastered: z
     .string()
     .transform((val) => val === "true")
@@ -230,7 +228,7 @@ export const GET: APIRoute = async (context) => {
     }
 
     // Map to DetailedProgressItem format
-    const progress = (progressData || []).map((item: any) => ({
+    const progress = (progressData || []).map((item: Record<string, unknown>) => ({
       id: item.id,
       vocabulary_id: item.vocabulary_id,
       word_text: item.vocabulary?.word_text || "",

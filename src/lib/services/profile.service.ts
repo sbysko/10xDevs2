@@ -13,6 +13,7 @@
 
 import type { SupabaseClient } from "@/db/supabase.client";
 import type { CreateProfileCommand, ProfileDTO, CategoryProgressDTO, CategoryProgressItem } from "@/types";
+import type { Database } from "@/db/database.types";
 
 /**
  * Service for managing child profiles
@@ -223,16 +224,18 @@ export class ProfileService {
         categoryMap.set(category, { total: 0, mastered: 0 });
       }
 
-      const stats = categoryMap.get(category)!;
-      stats.total += 1;
-      if (isMastered) {
-        stats.mastered += 1;
+      const stats = categoryMap.get(category);
+      if (stats) {
+        stats.total += 1;
+        if (isMastered) {
+          stats.mastered += 1;
+        }
       }
     });
 
     // 4. Build CategoryProgressItem array
     const categories: CategoryProgressItem[] = Array.from(categoryMap.entries()).map(([category, stats]) => ({
-      category: category as any, // vocabulary_category enum
+      category: category as Database["public"]["Enums"]["vocabulary_category"],
       total_words: stats.total,
       mastered_words: stats.mastered,
       completion_percentage: stats.total > 0 ? (stats.mastered / stats.total) * 100 : 0,

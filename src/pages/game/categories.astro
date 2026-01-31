@@ -21,12 +21,16 @@
 
 import Layout from "@/layouts/Layout.astro";
 import CategoryDashboard from "@/components/CategoryDashboard";
+import AppHeader from "@/components/AppHeader";
 
 // Disable prerendering (requires sessionStorage check)
 export const prerender = false;
 ---
 
 <Layout title="Wybierz kategorię - Dopasuj Obrazek do Słowa">
+  <!-- App Header with logout button -->
+  <AppHeader client:load />
+
   <div class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-8">
     <div class="container mx-auto px-4">
       <!-- Category Dashboard (React Island) -->

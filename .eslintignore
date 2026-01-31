@@ -1,0 +1,5 @@
+# ESLint Ignore File
+# Exclude example/test files and generated files
+
+examples.ts
+src/db/database.types.ts

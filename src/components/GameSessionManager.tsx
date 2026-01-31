@@ -15,7 +15,7 @@
  * - category: Optional category filter (from URL query param)
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useGameSession } from "@/components/hooks/useGameSession";
 import SessionLoader from "@/components/SessionLoader";
 import GameScreen from "@/components/GameScreen";
@@ -89,8 +89,7 @@ export default function GameSessionManager({ category }: GameSessionManagerProps
     if (isComplete && answers.length > 0) {
       saveProgress();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isComplete]);
+  }, [isComplete, answers.length, saveProgress]);
 
   // ===================================================================
   // API FUNCTIONS
@@ -99,7 +98,7 @@ export default function GameSessionManager({ category }: GameSessionManagerProps
   /**
    * Save progress to backend (batch mode)
    */
-  const saveProgress = async () => {
+  const saveProgress = useCallback(async () => {
     if (!profileId || answers.length === 0) {
       return;
     }
@@ -133,7 +132,7 @@ export default function GameSessionManager({ category }: GameSessionManagerProps
       console.error("Error saving progress:", err);
       // Don't block UI - progress save is non-critical
     }
-  };
+  }, [profileId, answers]);
 
   // ===================================================================
   // RENDER - LOADING STATE

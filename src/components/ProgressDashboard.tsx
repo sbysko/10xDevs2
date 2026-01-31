@@ -32,8 +32,17 @@ export default function ProgressDashboard({ initialProfileId }: ProgressDashboar
   // HOOK
   // ===================================================================
 
-  const { profiles, selectedProfileId, stats, categoryProgress, masteredWords, isLoading, error, selectProfile, refetch } =
-    useProgressStats(initialProfileId);
+  const {
+    profiles,
+    selectedProfileId,
+    stats,
+    categoryProgress,
+    masteredWords,
+    isLoading,
+    error,
+    selectProfile,
+    refetch,
+  } = useProgressStats(initialProfileId);
 
   // ===================================================================
   // LOADING STATE
@@ -108,9 +117,7 @@ export default function ProgressDashboard({ initialProfileId }: ProgressDashboar
           <div className="text-center">
             <div className="mb-4 text-6xl">📚</div>
             <h2 className="mb-2 text-2xl font-bold text-purple-800">Jeszcze nie rozpoczęto gry</h2>
-            <p className="mb-6 text-lg text-purple-600">
-              Wybierz kategorię i zacznij naukę, aby zobaczyć statystyki!
-            </p>
+            <p className="mb-6 text-lg text-purple-600">Wybierz kategorię i zacznij naukę, aby zobaczyć statystyki!</p>
             <Button
               onClick={() => (window.location.href = "/game/categories")}
               className="bg-purple-600 hover:bg-purple-700"

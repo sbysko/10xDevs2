@@ -28,13 +28,7 @@ interface QuestionCardProps {
   attempts: number;
 }
 
-export default function QuestionCard({
-  word,
-  answerOptions,
-  onAnswer,
-  onCorrectAnswer,
-  attempts,
-}: QuestionCardProps) {
+export default function QuestionCard({ word, answerOptions, onAnswer, onCorrectAnswer, attempts }: QuestionCardProps) {
   // ===================================================================
   // STATE
   // ===================================================================

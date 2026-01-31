@@ -138,7 +138,6 @@ export function useProgressStats(initialProfileId?: string | null): UseProgressS
       setStats(data);
       return data;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Nieznany błąd";
       console.error("Error fetching stats:", err);
       throw err;
     }

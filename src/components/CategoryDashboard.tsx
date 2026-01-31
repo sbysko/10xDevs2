@@ -122,7 +122,12 @@ export default function CategoryDashboard() {
           const categoryProgress = progress?.categories.find((p) => p.category === category.code) || null;
 
           return (
-            <CategoryCard key={category.code} category={category} progress={categoryProgress} onSelect={selectCategory} />
+            <CategoryCard
+              key={category.code}
+              category={category}
+              progress={categoryProgress}
+              onSelect={selectCategory}
+            />
           );
         })}
       </CategoryGrid>

@@ -20,6 +20,7 @@
 
 import Layout from "@/layouts/Layout.astro";
 import GameSessionManager from "@/components/GameSessionManager";
+import AppHeader from "@/components/AppHeader";
 
 // Disable prerendering for this page (requires session data)
 export const prerender = false;
@@ -30,6 +31,9 @@ const category = url.searchParams.get("category");
 ---
 
 <Layout title="Gra - Dopasuj Obrazek do Słowa">
+  <!-- App Header with logout button -->
+  <AppHeader client:load />
+
   <main class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-8">
     <!-- React Island: Interactive game session -->
     <!-- ProfileId retrieved from sessionStorage inside component -->

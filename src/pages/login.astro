@@ -1,0 +1,28 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import LoginForm from "@/components/LoginForm";
+
+// Disable prerendering for dynamic authentication
+export const prerender = false;
+
+// Server-side check: if user is already logged in, redirect to profiles
+// This is handled by middleware, but we keep it here for clarity
+const supabase = Astro.locals.supabase;
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+if (session) {
+  return Astro.redirect("/profiles");
+}
+---
+
+<Layout title="Logowanie - Dopasuj Obrazek do Słowa">
+  <div
+    class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
+  >
+    <div class="w-full max-w-md py-8">
+      <LoginForm client:load />
+    </div>
+  </div>
+</Layout>

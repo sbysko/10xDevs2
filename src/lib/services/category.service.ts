@@ -7,6 +7,7 @@
 
 import type { SupabaseClient } from "@/db/supabase.client";
 import type { CategoriesListDTO, CategoryDTO } from "@/types";
+import type { Database } from "@/db/database.types";
 
 /**
  * Category names mapping (Polish)
@@ -29,15 +30,9 @@ const CATEGORY_NAMES: Record<string, string> = {
  * @example
  * const categories = await CategoryService.getAllCategories(supabase, 'pl');
  */
-export async function getAllCategories(
-  supabase: SupabaseClient,
-  languageCode = "pl"
-): Promise<CategoriesListDTO> {
+export async function getAllCategories(supabase: SupabaseClient, languageCode = "pl"): Promise<CategoriesListDTO> {
   // Query vocabulary table to get word counts per category
-  const { data, error } = await supabase
-    .from("vocabulary")
-    .select("category")
-    .eq("language_code", languageCode);
+  const { data, error } = await supabase.from("vocabulary").select("category").eq("language_code", languageCode);
 
   if (error) {
     throw new Error(`Failed to fetch categories: ${error.message}`);
@@ -63,7 +58,7 @@ export async function getAllCategories(
 
   // Build CategoryDTO array
   const categories: CategoryDTO[] = Object.entries(categoryCounts).map(([code, count]) => ({
-    code: code as any, // vocabulary_category enum
+    code: code as Database["public"]["Enums"]["vocabulary_category"],
     name: CATEGORY_NAMES[code] || code,
     word_count: count,
   }));

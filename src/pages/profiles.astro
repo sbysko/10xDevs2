@@ -16,12 +16,16 @@
 
 import Layout from "@/layouts/Layout.astro";
 import ProfileManager from "@/components/ProfileManager";
+import AppHeader from "@/components/AppHeader";
 
 // Disable prerendering for this page (requires authentication)
 export const prerender = false;
 ---
 
 <Layout title="Wybierz Profil - Dopasuj Obrazek do Słowa">
+  <!-- App Header with logout button -->
+  <AppHeader client:load />
+
   <main class="min-h-screen bg-gradient-to-b from-blue-100 to-purple-100 p-4 md:p-8">
     <div class="mx-auto max-w-6xl">
       <header class="mb-8 text-center">

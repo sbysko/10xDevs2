@@ -61,9 +61,7 @@ export default function CategoryCard({ category, progress, onSelect }: CategoryC
       {/* Card Content */}
       <div className="flex flex-col items-center gap-4">
         {/* Icon */}
-        <div className="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
-          {icon}
-        </div>
+        <div className="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">{icon}</div>
 
         {/* Category Name */}
         <h3 className="text-center text-2xl font-bold text-white drop-shadow-md">{category.name}</h3>

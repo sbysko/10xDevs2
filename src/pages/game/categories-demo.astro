@@ -24,12 +24,10 @@ export const prerender = false;
     <div class="container mx-auto px-4">
       <!-- Demo Banner -->
       <div class="mb-6 rounded-lg bg-yellow-50 border-2 border-yellow-300 p-4 text-center">
-        <p class="text-lg font-semibold text-yellow-800">
-          📋 Strona Demo - Testowanie UI bez backendu
-        </p>
+        <p class="text-lg font-semibold text-yellow-800">📋 Strona Demo - Testowanie UI bez backendu</p>
         <p class="text-sm text-yellow-700 mt-2">
-          To jest strona testowa pokazująca wszystkie komponenty widoku kategorii.
-          API nie jest wymagane - używamy mock data.
+          To jest strona testowa pokazująca wszystkie komponenty widoku kategorii. API nie jest wymagane - używamy mock
+          data.
         </p>
       </div>
 
@@ -37,11 +35,7 @@ export const prerender = false;
       <div class="mb-8 flex items-center justify-between">
         <div class="flex items-center gap-4">
           <div class="h-12 w-12 overflow-hidden rounded-full bg-white shadow-md">
-            <img
-              src="/avatars/avatar-1.svg"
-              alt="Avatar Zosia"
-              class="h-full w-full object-cover"
-            />
+            <img src="/avatars/avatar-1.svg" alt="Avatar Zosia" class="h-full w-full object-cover" />
           </div>
           <div>
             <p class="text-sm font-medium text-purple-600">Grasz jako:</p>
@@ -52,8 +46,16 @@ export const prerender = false;
           class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-purple-600 shadow-md transition-all hover:bg-purple-50 hover:shadow-lg"
           onclick="alert('Przekierowanie do /profiles')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7"></path>
           </svg>
           <span class="hidden sm:inline">Zmień profil</span>
         </button>
@@ -73,9 +75,7 @@ export const prerender = false;
           onclick="alert('Wybrano: Zwierzęta → /game/session?category=zwierzeta')"
         >
           <div class="flex flex-col items-center gap-4">
-            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
-              🐾
-            </div>
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">🐾</div>
             <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Zwierzęta</h3>
             <div class="w-full space-y-2">
               <p class="text-center text-lg font-semibold text-white">12/50</p>
@@ -85,7 +85,9 @@ export const prerender = false;
               <p class="text-center text-sm font-medium text-white opacity-90">24% opanowane</p>
             </div>
           </div>
-          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+          <div
+            class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20"
+          >
             <div class="absolute inset-0 bg-white"></div>
           </div>
         </button>
@@ -96,9 +98,7 @@ export const prerender = false;
           onclick="alert('Wybrano: Owoce i Warzywa')"
         >
           <div class="flex flex-col items-center gap-4">
-            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
-              🍎
-            </div>
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">🍎</div>
             <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Owoce i Warzywa</h3>
             <div class="w-full space-y-2">
               <p class="text-center text-lg font-semibold text-white">35/50</p>
@@ -108,7 +108,9 @@ export const prerender = false;
               <p class="text-center text-sm font-medium text-white opacity-90">70% opanowane</p>
             </div>
           </div>
-          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+          <div
+            class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20"
+          >
             <div class="absolute inset-0 bg-white"></div>
           </div>
         </button>
@@ -119,9 +121,7 @@ export const prerender = false;
           onclick="alert('Wybrano: Pojazdy')"
         >
           <div class="flex flex-col items-center gap-4">
-            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
-              🚗
-            </div>
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">🚗</div>
             <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Pojazdy</h3>
             <div class="w-full space-y-2">
               <p class="text-center text-lg font-semibold text-white">0/50</p>
@@ -131,7 +131,9 @@ export const prerender = false;
               <p class="text-center text-sm font-medium text-white opacity-90">0% opanowane</p>
             </div>
           </div>
-          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+          <div
+            class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20"
+          >
             <div class="absolute inset-0 bg-white"></div>
           </div>
         </button>
@@ -142,9 +144,7 @@ export const prerender = false;
           onclick="alert('Wybrano: Kolory i Kształty')"
         >
           <div class="flex flex-col items-center gap-4">
-            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
-              🎨
-            </div>
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">🎨</div>
             <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Kolory i Kształty</h3>
             <div class="w-full space-y-2">
               <p class="text-center text-lg font-semibold text-white">50/50</p>
@@ -154,7 +154,9 @@ export const prerender = false;
               <p class="text-center text-sm font-medium text-white opacity-90">100% opanowane</p>
             </div>
           </div>
-          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+          <div
+            class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20"
+          >
             <div class="absolute inset-0 bg-white"></div>
           </div>
         </button>
@@ -165,9 +167,7 @@ export const prerender = false;
           onclick="alert('Wybrano: Przedmioty Codzienne')"
         >
           <div class="flex flex-col items-center gap-4">
-            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">
-              🏠
-            </div>
+            <div class="text-6xl drop-shadow-md transition-transform duration-200 group-hover:scale-110">🏠</div>
             <h3 class="text-center text-2xl font-bold text-white drop-shadow-md">Przedmioty Codzienne</h3>
             <div class="w-full space-y-2">
               <p class="text-center text-lg font-semibold text-white">8/50</p>
@@ -177,7 +177,9 @@ export const prerender = false;
               <p class="text-center text-sm font-medium text-white opacity-90">16% opanowane</p>
             </div>
           </div>
-          <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20">
+          <div
+            class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-20"
+          >
             <div class="absolute inset-0 bg-white"></div>
           </div>
         </button>
@@ -193,7 +195,8 @@ export const prerender = false;
               <div
                 class="h-full rounded-full bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-500"
                 style="width: 42%"
-              ></div>
+              >
+              </div>
             </div>
           </div>
           <div class="text-lg font-semibold text-gray-600">42%</div>

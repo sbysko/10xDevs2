@@ -24,7 +24,12 @@
       "Bash(npm run lint)",
       "Bash(npm run lint:fix:*)",
       "Bash(timeout:*)",
-      "Bash(docker --version:*)"
+      "Bash(docker --version:*)",
+      "Bash(if [ -f \"d:/VSCode/10xDevs2/examples.ts\" ])",
+      "Bash(then echo \"File exists\")",
+      "Bash(else echo \"File not found\")",
+      "Bash(fi)",
+      "Bash(if [ -f \"d:/VSCode/10xDevs2/.env\" ])"
     ],
     "deny": [],
     "ask": []

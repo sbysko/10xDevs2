@@ -88,10 +88,7 @@ export interface AnswerRecord {
  * } = useGameSession(profileId, 'zwierzeta');
  * ```
  */
-export function useGameSession(
-  profileId: string | null,
-  category: string | null = null
-): UseGameSessionReturn {
+export function useGameSession(profileId: string | null, category: string | null = null): UseGameSessionReturn {
   // ===================================================================
   // STATE
   // ===================================================================

@@ -73,7 +73,7 @@ export default function ResultsModal({
   // ===================================================================
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}} modal>
+    <Dialog open={isOpen} onOpenChange={() => undefined} modal>
       <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-center text-3xl font-bold text-purple-800">Koniec gry!</DialogTitle>
@@ -110,10 +110,7 @@ export default function ResultsModal({
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            <Button
-              onClick={onPlayAgain}
-              className="w-full bg-purple-600 py-6 text-xl font-bold hover:bg-purple-700"
-            >
+            <Button onClick={onPlayAgain} className="w-full bg-purple-600 py-6 text-xl font-bold hover:bg-purple-700">
               🎮 Graj ponownie
             </Button>
             <Button
