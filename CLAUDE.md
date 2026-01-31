@@ -260,6 +260,9 @@ Example: `20260126120000_initial_schema_setup.sql`
 - Consider using the `useOptimistic` hook for optimistic UI updates in forms
 - Use `useTransition` for non-urgent state updates to keep the UI responsive
 
+### Supabase-Auth-Specific
+@./cursor/rules/supabase-auth.mdc
+
 ### shadcn/ui-Specific
 @./cursor/rules/ui-shadcn-helper.mdc
 

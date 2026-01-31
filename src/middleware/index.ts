@@ -5,7 +5,7 @@
  * in context.locals, making it available to all API routes and pages.
  *
  * Security:
- * - Uses SUPABASE_URL and SUPABASE_KEY from environment variables
+ * - Uses PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY from environment variables
  * - Passes Authorization header to Supabase for JWT verification
  * - Client is automatically configured with user's session
  *
@@ -36,7 +36,7 @@ const AUTH_ROUTES = ["/login", "/register"];
  * Middleware to initialize Supabase client and handle authentication
  *
  * Flow:
- * 1. Extract SUPABASE_URL and SUPABASE_KEY from environment
+ * 1. Extract PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY from environment
  * 2. Create server-side Supabase client with cookie handling
  * 3. Attach client to context.locals.supabase
  * 4. Check authentication for protected routes
@@ -44,12 +44,12 @@ const AUTH_ROUTES = ["/login", "/register"];
  */
 export const onRequest = defineMiddleware(async (context, next) => {
   // Get Supabase configuration from environment variables
-  const supabaseUrl = import.meta.env.SUPABASE_URL;
-  const supabaseKey = import.meta.env.SUPABASE_KEY;
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     console.error("Missing Supabase environment variables");
-    throw new Error("SUPABASE_URL and SUPABASE_KEY must be set in environment variables");
+    throw new Error("PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY must be set in environment variables");
   }
 
   /**

@@ -19,7 +19,7 @@
 
 import type { SupabaseClient } from "@/db/supabase.client";
 import type { GameSessionDTO, GameWordDTO, CreateGameSessionCommand, AlgorithmInfo } from "@/types";
-import type { Database } from "@/db/database_types";
+import type { Database } from "@/db/database.types";
 
 type VocabularyCategory = Database["public"]["Enums"]["vocabulary_category"];
 

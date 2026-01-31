@@ -4,11 +4,11 @@
  * This file contains all TypeScript type definitions for API request/response objects
  * derived from database entities and API specifications.
  *
- * Database source: database_types.ts
+ * Database source: database.types.ts
  * API specification: api-plan.md
  */
 
-import type { Database } from "./database_types";
+import type { Database } from "./src/db/database.types";
 
 // ============================================================================
 // BASE DATABASE TYPE UTILITIES

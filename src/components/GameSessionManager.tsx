@@ -86,10 +86,11 @@ export default function GameSessionManager({ category }: GameSessionManagerProps
 
   // Save progress when session is complete
   useEffect(() => {
-    if (isComplete && answers.length > 0) {
+    if (isComplete && answers.length > 0 && profileId) {
       saveProgress();
     }
-  }, [isComplete, answers.length, saveProgress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isComplete, answers.length, profileId]);
 
   // ===================================================================
   // API FUNCTIONS
