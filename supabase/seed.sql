@@ -89,7 +89,7 @@ VALUES
   ('Hipopotam', 'zwierzeta', 'pl', 'vocabulary/pl/zwierzeta/hipopotam.jpg', 2),
   ('Nosorożec', 'zwierzeta', 'pl', 'vocabulary/pl/zwierzeta/nosorozec.jpg', 2),
   ('Wielbłąd', 'zwierzeta', 'pl', 'vocabulary/pl/zwierzeta/wielblad.jpg', 2),
-  ('Pingwin', 'zwierzeta', 'pl', 'vocabulary/pl/zwierzeta/pingwin.jpg', 1);
+  ('Mysz', 'zwierzeta', 'pl', 'vocabulary/pl/zwierzeta/mysz.jpg', 1);
 
 -- ============================================================================
 -- KATEGORIA 2: OWOCE I WARZYWA (50 słów)
@@ -222,7 +222,8 @@ VALUES
   ('Narty', 'pojazdy', 'pl', 'vocabulary/pl/pojazdy/narty.jpg', 1),
   ('Snowboard', 'pojazdy', 'pl', 'vocabulary/pl/pojazdy/snowboard.jpg', 2),
   ('Sanki', 'pojazdy', 'pl', 'vocabulary/pl/pojazdy/sanki.jpg', 1),
-  ('Wrotki', 'pojazdy', 'pl', 'vocabulary/pl/pojazdy/wrotki.jpg', 2);
+  ('Wrotki', 'pojazdy', 'pl', 'vocabulary/pl/pojazdy/wrotki.jpg', 2),
+  ('Rowerek', 'pojazdy', 'pl', 'vocabulary/pl/pojazdy/rowerek.jpg', 1);
 
 -- ============================================================================
 -- KATEGORIA 4: KOLORY I KSZTAŁTY (50 słów)
@@ -353,7 +354,8 @@ VALUES
   ('Linijka', 'przedmioty_codzienne', 'pl', 'vocabulary/pl/przedmioty_codzienne/linijka.jpg', 2),
   ('Plecak', 'przedmioty_codzienne', 'pl', 'vocabulary/pl/przedmioty_codzienne/plecak.jpg', 1),
   ('Torba', 'przedmioty_codzienne', 'pl', 'vocabulary/pl/przedmioty_codzienne/torba.jpg', 1),
-  ('Parasol', 'przedmioty_codzienne', 'pl', 'vocabulary/pl/przedmioty_codzienne/parasol.jpg', 1);
+  ('Parasol', 'przedmioty_codzienne', 'pl', 'vocabulary/pl/przedmioty_codzienne/parasol.jpg', 1),
+  ('Zegar', 'przedmioty_codzienne', 'pl', 'vocabulary/pl/przedmioty_codzienne/zegar.jpg', 1);
 
 -- ============================================================================
 -- VERIFICATION QUERY

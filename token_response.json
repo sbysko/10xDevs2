@@ -1,1 +1,51 @@
-{"code":400,"error_code":"invalid_credentials","msg":"Invalid login credentials"}
+{
+    "access_token": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjU0MzIxL2F1dGgvdjEiLCJzdWIiOiIzNjU2ODllYy1hYWJhLTQzZjYtYjhhZC00ODhmMDlkYmE1NGMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY5ODk0NjYzLCJpYXQiOjE3Njk4OTEwNjMsImVtYWlsIjoidGVzdHBhcmVudEBleGFtcGxlLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJ0ZXN0cGFyZW50QGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiMzY1Njg5ZWMtYWFiYS00M2Y2LWI4YWQtNDg4ZjA5ZGJhNTRjIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3Njk4OTEwNjN9XSwic2Vzc2lvbl9pZCI6ImFmOTkyNWExLTEzNDUtNGU2Ni1iOWFlLTY3MTE0YzQ1Y2NkZiIsImlzX2Fub255bW91cyI6ZmFsc2V9.qdVo2kApvjAOVcuS-LojCF0rKsj2EN6cj2IAQi9-F-s51ISsRUHdfvUV2V_xKKqpME4pksEk82w3jMljFYhiEw",
+    "token_type": "bearer",
+    "expires_in": 3600,
+    "expires_at": 1769894663,
+    "refresh_token": "bnkur3ico2iy",
+    "user": {
+        "id": "365689ec-aaba-43f6-b8ad-488f09dba54c",
+        "aud": "authenticated",
+        "role": "authenticated",
+        "email": "testparent@example.com",
+        "email_confirmed_at": "2026-01-31T20:24:07.979886Z",
+        "phone": "",
+        "confirmed_at": "2026-01-31T20:24:07.979886Z",
+        "last_sign_in_at": "2026-01-31T20:24:23.800079974Z",
+        "app_metadata": {
+            "provider": "email",
+            "providers": [
+                "email"
+            ]
+        },
+        "user_metadata": {
+            "email": "testparent@example.com",
+            "email_verified": true,
+            "phone_verified": false,
+            "sub": "365689ec-aaba-43f6-b8ad-488f09dba54c"
+        },
+        "identities": [
+            {
+                "identity_id": "64cf8345-0f79-4257-aa1e-f2decdd61570",
+                "id": "365689ec-aaba-43f6-b8ad-488f09dba54c",
+                "user_id": "365689ec-aaba-43f6-b8ad-488f09dba54c",
+                "identity_data": {
+                    "email": "testparent@example.com",
+                    "email_verified": false,
+                    "phone_verified": false,
+                    "sub": "365689ec-aaba-43f6-b8ad-488f09dba54c"
+                },
+                "provider": "email",
+                "last_sign_in_at": "2026-01-31T20:24:07.975433Z",
+                "created_at": "2026-01-31T20:24:07.975465Z",
+                "updated_at": "2026-01-31T20:24:07.975465Z",
+                "email": "testparent@example.com"
+            }
+        ],
+        "created_at": "2026-01-31T20:24:07.970219Z",
+        "updated_at": "2026-01-31T20:24:23.803101Z",
+        "is_anonymous": false
+    },
+    "weak_password": null
+}
