@@ -14,6 +14,7 @@
  */
 
 import { ArrowLeft } from "lucide-react";
+import { normalizeAvatarUrl } from "@/lib/utils";
 
 interface ProfileHeaderProps {
   profile: {
@@ -25,7 +26,7 @@ interface ProfileHeaderProps {
 }
 
 export default function ProfileHeader({ profile, onBack }: ProfileHeaderProps) {
-  const avatarUrl = profile.avatar_url || "/avatars/default-avatar.svg";
+  const avatarUrl = normalizeAvatarUrl(profile.avatar_url);
   const displayName = profile.display_name || "Gracz";
 
   return (

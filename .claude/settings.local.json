@@ -41,7 +41,12 @@
       "Bash(USER_ID='365689ec-aaba-43f6-b8ad-488f09dba54c':*)",
       "Bash(JWT_TOKEN='eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjU0MzIxL2F1dGgvdjEiLCJzdWIiOiIzNjU2ODllYy1hYWJhLTQzZjYtYjhhZC00ODhmMDlkYmE1NGMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY5ODk0NjYzLCJpYXQiOjE3Njk4OTEwNjMsImVtYWlsIjoidGVzdHBhcmVudEBleGFtcGxlLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJ0ZXN0cGFyZW50QGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiMzY1Njg5ZWMtYWFiYS00M2Y2LWI4YWQtNDg4ZjA5ZGJhNTRjIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3Njk4OTEwNjN9XSwic2Vzc2lvbl9pZCI6ImFmOTkyNWExLTEzNDUtNGU2Ni1iOWFlLTY3MTE0YzQ1Y2NkZiIsImlzX2Fub255bW91cyI6ZmFsc2V9.qdVo2kApvjAOVcuS-LojCF0rKsj2EN6cj2IAQi9-F-s51ISsRUHdfvUV2V_xKKqpME4pksEk82w3jMljFYhiEw')",
       "Bash(node test_progress_endpoint.js:*)",
-      "Bash(node test_progress_errors.js:*)"
+      "Bash(node test_progress_errors.js:*)",
+      "Bash(ping:*)",
+      "Bash(npx vitest:*)",
+      "Bash(echo:*)",
+      "Bash(dir:*)",
+      "Bash(npm view:*)"
     ],
     "deny": [],
     "ask": []

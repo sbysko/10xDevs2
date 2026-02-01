@@ -16,6 +16,7 @@
  */
 
 import type { ProfileDTO } from "@/types";
+import { normalizeAvatarUrl } from "@/lib/utils";
 
 interface ProfileSelectorProps {
   profiles: ProfileDTO[];
@@ -54,7 +55,7 @@ export default function ProfileSelector({ profiles, selectedProfileId, onSelect 
         <div className="mt-4 flex items-center gap-3 rounded-lg bg-purple-50 p-4">
           {selectedProfile.avatar_url && (
             <img
-              src={`/${selectedProfile.avatar_url}`}
+              src={normalizeAvatarUrl(selectedProfile.avatar_url)}
               alt={selectedProfile.display_name}
               className="h-12 w-12 rounded-full border-2 border-purple-300"
               onError={(e) => {

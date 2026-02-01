@@ -13,7 +13,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { CategoryDTO, CategoryProgressDTO, CategoriesListDTO } from "@/types";
-import { deleteCookie, getCookie } from "@/lib/utils";
+import { deleteCookie } from "@/lib/utils";
+import { getAccessToken } from "@/lib/supabase-browser";
 
 /**
  * Selected profile info from sessionStorage
@@ -118,8 +119,18 @@ export function useCategoriesManager(): UseCategoriesManagerReturn {
    */
   const fetchCategories = useCallback(async (): Promise<void> => {
     try {
+      // Get authentication token
+      const token = await getAccessToken();
+
+      if (!token) {
+        throw new Error("Sesja wygasła. Zaloguj się ponownie.");
+      }
+
       const response = await fetch("/api/categories?language=pl", {
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         credentials: "include",
       });
 
@@ -143,8 +154,21 @@ export function useCategoriesManager(): UseCategoriesManagerReturn {
    */
   const fetchProgress = useCallback(async (profileId: string): Promise<void> => {
     try {
+      // Get authentication token
+      const token = await getAccessToken();
+
+      if (!token) {
+        // Progress is optional - if auth fails, continue without progress
+        console.warn("No auth token available for progress fetch");
+        setProgress(null);
+        return;
+      }
+
       const response = await fetch(`/api/profiles/${profileId}/progress/categories?language=pl`, {
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         credentials: "include",
       });
 
@@ -235,8 +259,9 @@ export function useCategoriesManager(): UseCategoriesManagerReturn {
     // Clear active profile cookie
     deleteCookie("app_active_profile_id");
 
-    // Navigate to profiles
-    window.location.href = "/profiles";
+    // Navigate to profiles with switch parameter to prevent auto-redirect
+    // This allows users with single profile to add more profiles
+    window.location.href = "/profiles?switch=true";
   }, []);
 
   /**

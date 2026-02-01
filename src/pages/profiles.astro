@@ -40,11 +40,15 @@ if (error) {
 
 const profileCount = profiles?.length ?? 0;
 
+// Check if user explicitly wants to switch profiles (from "Zmień profil" button)
+const url = new URL(Astro.request.url);
+const isSwitchingProfile = url.searchParams.get("switch") === "true";
+
 // SMART REDIRECT LOGIC
-// If 1 profile → auto-select and redirect to game categories
+// If 1 profile AND user didn't click "Zmień profil" → auto-select and redirect to game categories
 // Store profile data to pass to AutoSelectProfile component
 let singleProfile = null;
-if (profileCount === 1 && profiles) {
+if (profileCount === 1 && profiles && !isSwitchingProfile) {
   const profile = profiles[0];
 
   // Set active profile cookie
@@ -60,7 +64,7 @@ if (profileCount === 1 && profiles) {
   singleProfile = profile;
 }
 
-// If 0 or 2+ profiles → show profile management screen (continue rendering)
+// If 0 or 2+ profiles OR user is switching → show profile management screen (continue rendering)
 ---
 
 <Layout title="Wybierz Profil - Dopasuj Obrazek do Słowa">

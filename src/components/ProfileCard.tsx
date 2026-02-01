@@ -21,7 +21,7 @@
 
 import { useCallback } from "react";
 import type { ProfileDTO } from "@/types";
-import { setCookie } from "@/lib/utils";
+import { setCookie, normalizeAvatarUrl } from "@/lib/utils";
 
 interface ProfileCardProps {
   profile: ProfileDTO;
@@ -59,8 +59,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
   // AVATAR URL
   // ===================================================================
 
-  // Use avatar_url if provided, otherwise show default avatar
-  const avatarUrl = profile.avatar_url || "/avatars/default-avatar.svg";
+  const avatarUrl = normalizeAvatarUrl(profile.avatar_url);
 
   // ===================================================================
   // RENDER

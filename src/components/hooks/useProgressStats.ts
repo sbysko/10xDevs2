@@ -15,6 +15,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { ProfileDTO, ProfileStatsDTO, CategoryProgressDTO, DetailedProgressItem } from "@/types";
+import { getAccessToken } from "@/lib/supabase-browser";
 
 /**
  * Hook state interface
@@ -79,10 +80,18 @@ export function useProgressStats(initialProfileId?: string | null): UseProgressS
    */
   const fetchProfiles = useCallback(async () => {
     try {
+      // Get authentication token
+      const token = await getAccessToken();
+
+      if (!token) {
+        throw new Error("Musisz być zalogowany");
+      }
+
       const response = await fetch("/api/profiles", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       });
@@ -116,10 +125,18 @@ export function useProgressStats(initialProfileId?: string | null): UseProgressS
    */
   const fetchStats = useCallback(async (profileId: string) => {
     try {
+      // Get authentication token
+      const token = await getAccessToken();
+
+      if (!token) {
+        throw new Error("Musisz być zalogowany");
+      }
+
       const response = await fetch(`/api/profiles/${profileId}/stats`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       });
@@ -148,10 +165,18 @@ export function useProgressStats(initialProfileId?: string | null): UseProgressS
    */
   const fetchCategoryProgress = useCallback(async (profileId: string) => {
     try {
+      // Get authentication token
+      const token = await getAccessToken();
+
+      if (!token) {
+        throw new Error("Musisz być zalogowany");
+      }
+
       const response = await fetch(`/api/profiles/${profileId}/progress/categories?language=pl`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       });
@@ -174,10 +199,18 @@ export function useProgressStats(initialProfileId?: string | null): UseProgressS
    */
   const fetchMasteredWords = useCallback(async (profileId: string) => {
     try {
+      // Get authentication token
+      const token = await getAccessToken();
+
+      if (!token) {
+        throw new Error("Musisz być zalogowany");
+      }
+
       const response = await fetch(`/api/profiles/${profileId}/progress?is_mastered=true&limit=100`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       });

@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { CreateProfileSchema } from "@/lib/validation/profile.schemas";
 import type { ProfileDTO, CreateProfileCommand } from "@/types";
 import { z } from "zod";
+import { getAccessToken } from "@/lib/supabase-browser";
 
 interface CreateProfileModalProps {
   isOpen: boolean;
@@ -131,6 +132,14 @@ export default function CreateProfileModal({ isOpen, onCreated, onClose }: Creat
       setError("");
 
       try {
+        // Get authentication token
+        const token = await getAccessToken();
+
+        if (!token) {
+          setError("Sesja wygasła. Zaloguj się ponownie.");
+          return;
+        }
+
         // Prepare request body
         const requestBody: CreateProfileCommand = {
           display_name: displayName,
@@ -143,6 +152,7 @@ export default function CreateProfileModal({ isOpen, onCreated, onClose }: Creat
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           credentials: "include",
           body: JSON.stringify(requestBody),

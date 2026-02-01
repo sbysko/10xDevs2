@@ -33,6 +33,7 @@ interface GameScreenProps {
   totalStars: number;
   onAnswer: (selectedText: string) => void;
   onNextQuestion: () => void;
+  onQuitGame?: () => void;
 }
 
 export default function GameScreen({
@@ -44,11 +45,29 @@ export default function GameScreen({
   totalStars,
   onAnswer,
   onNextQuestion,
+  onQuitGame,
 }: GameScreenProps) {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 p-4 md:p-8">
-      {/* Progress Bar */}
-      <ProgressBar current={currentIndex + 1} total={totalQuestions} stars={totalStars} />
+      {/* Header with Progress Bar and Quit Button */}
+      <div className="flex items-center justify-between gap-4">
+        {/* Progress Bar */}
+        <div className="flex-1">
+          <ProgressBar current={currentIndex + 1} total={totalQuestions} stars={totalStars} />
+        </div>
+
+        {/* Quit Button */}
+        {onQuitGame && (
+          <button
+            onClick={onQuitGame}
+            className="shrink-0 rounded-lg bg-red-500 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-600 active:bg-red-700 md:px-6 md:py-3"
+            aria-label="Zakończ grę"
+          >
+            <span className="hidden md:inline">Zakończ</span>
+            <span className="md:hidden">✕</span>
+          </button>
+        )}
+      </div>
 
       {/* Question Card */}
       <QuestionCard

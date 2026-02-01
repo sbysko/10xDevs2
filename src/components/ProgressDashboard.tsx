@@ -163,7 +163,7 @@ export default function ProgressDashboard({ initialProfileId }: ProgressDashboar
         >
           🎮 Kontynuuj naukę
         </Button>
-        <Button variant="outline" onClick={() => (window.location.href = "/profiles")}>
+        <Button variant="outline" onClick={() => (window.location.href = "/profiles?switch=true")}>
           👥 Zmień profil
         </Button>
       </div>

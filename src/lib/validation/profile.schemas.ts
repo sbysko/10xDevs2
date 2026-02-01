@@ -78,7 +78,7 @@ export const CreateProfileSchema = z.object({
    * Language code for child's UI
    *
    * Rules:
-   * - Optional field
+   * - Optional field (defaults to 'pl' if not provided)
    * - Must be 'pl' (Polish) or 'en' (English)
    * - Defaults to 'pl' if not provided
    *
@@ -89,8 +89,7 @@ export const CreateProfileSchema = z.object({
     .enum(["pl", "en"], {
       errorMap: () => ({ message: "Language must be 'pl' or 'en'" }),
     })
-    .default("pl")
-    .optional(),
+    .default("pl"),
 });
 
 /**

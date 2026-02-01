@@ -61,3 +61,26 @@ export function deleteCookie(name: string): void {
   const securePart = isProduction() ? "; secure" : "";
   document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT${securePart}; samesite=lax`;
 }
+
+/**
+ * Normalize avatar URL to ensure it starts with /
+ * @param avatarUrl - Avatar URL from database (may or may not start with /)
+ * @param fallback - Fallback URL if avatarUrl is null/undefined
+ * @returns Normalized avatar URL with leading /
+ */
+export function normalizeAvatarUrl(
+  avatarUrl: string | null | undefined,
+  fallback: string = "/avatars/default-avatar.svg",
+): string {
+  if (!avatarUrl) {
+    return fallback;
+  }
+
+  // If already starts with /, return as-is
+  if (avatarUrl.startsWith("/")) {
+    return avatarUrl;
+  }
+
+  // Add leading / for relative paths
+  return `/${avatarUrl}`;
+}

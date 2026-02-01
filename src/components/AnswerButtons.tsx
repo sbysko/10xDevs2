@@ -16,7 +16,7 @@
  * - disabled: Whether buttons are disabled (during transition)
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 export interface AnswerOption {
   text: string;
@@ -36,6 +36,18 @@ export default function AnswerButtons({ options, onAnswer, disabled = false }: A
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+
+  // ===================================================================
+  // EFFECTS
+  // ===================================================================
+
+  /**
+   * Reset selection state when options change (new question)
+   */
+  useEffect(() => {
+    setSelectedIndex(null);
+    setIsCorrect(null);
+  }, [options]);
 
   // ===================================================================
   // HANDLERS

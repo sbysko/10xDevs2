@@ -20,6 +20,7 @@ import { useGameSession } from "@/components/hooks/useGameSession";
 import SessionLoader from "@/components/SessionLoader";
 import GameScreen from "@/components/GameScreen";
 import ResultsModal from "@/components/ResultsModal";
+import { getAccessToken } from "@/lib/supabase-browser";
 
 interface GameSessionManagerProps {
   category: string | null;
@@ -105,10 +106,19 @@ export default function GameSessionManager({ category }: GameSessionManagerProps
     }
 
     try {
+      // Get authentication token
+      const token = await getAccessToken();
+
+      if (!token) {
+        console.error("No auth token available - cannot save progress");
+        return;
+      }
+
       const response = await fetch("/api/progress", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
         body: JSON.stringify({
@@ -210,6 +220,7 @@ export default function GameSessionManager({ category }: GameSessionManagerProps
         totalStars={totalStars}
         onAnswer={submitAnswer}
         onNextQuestion={nextQuestion}
+        onQuitGame={goToCategories}
       />
 
       {/* Results Modal */}

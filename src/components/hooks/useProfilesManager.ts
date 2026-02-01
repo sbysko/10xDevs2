@@ -14,6 +14,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { ProfileDTO } from "@/types";
+import { getAccessToken } from "@/lib/supabase-browser";
 
 /**
  * Modal types for the profile selection view
@@ -96,14 +97,20 @@ export function useProfilesManager(): UseProfilesManagerReturn {
     setError(null);
 
     try {
-      // Get JWT token from Supabase session (should be set by Astro middleware)
-      // For now, we'll use fetch with credentials to ensure cookies are sent
+      // Get authentication token
+      const token = await getAccessToken();
+
+      if (!token) {
+        throw new Error("Musisz być zalogowany, aby zobaczyć profile");
+      }
+
       const response = await fetch("/api/profiles", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        credentials: "include", // Include cookies for Supabase session
+        credentials: "include",
       });
 
       if (!response.ok) {

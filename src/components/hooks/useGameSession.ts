@@ -16,6 +16,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type { GameSessionDTO, GameWordDTO } from "@/types";
+import { getAccessToken } from "@/lib/supabase-browser";
 
 /**
  * Game session state
@@ -144,10 +145,26 @@ export function useGameSession(profileId: string | null, category: string | null
     setError(null);
 
     try {
+      // Get authentication token
+      const token = await getAccessToken();
+
+      console.log("[useGameSession] Token retrieved:", token ? "✓ Token exists" : "✗ No token");
+
+      if (!token) {
+        throw new Error("Musisz być zalogowany");
+      }
+
+      console.log("[useGameSession] Calling POST /api/game/sessions with:", {
+        profile_id: profileId,
+        category: category,
+        word_count: 10,
+      });
+
       const response = await fetch("/api/game/sessions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
         body: JSON.stringify({
@@ -157,9 +174,18 @@ export function useGameSession(profileId: string | null, category: string | null
         }),
       });
 
+      console.log("[useGameSession] Response status:", response.status, response.statusText);
+
       if (!response.ok) {
         // Handle error responses
-        const errorData = await response.json();
+        let errorData;
+        try {
+          errorData = await response.json();
+          console.error("[useGameSession] Error response:", errorData);
+        } catch {
+          console.error("[useGameSession] Failed to parse error response");
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
 
         if (response.status === 422) {
           // Insufficient words
