@@ -47,7 +47,8 @@
       "Bash(echo:*)",
       "Bash(dir:*)",
       "Bash(npm view:*)",
-      "Bash(git -C \"d:/VSCode/10xDevs2\" branch -a)"
+      "Bash(git -C \"d:/VSCode/10xDevs2\" branch -a)",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": []

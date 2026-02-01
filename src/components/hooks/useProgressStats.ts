@@ -106,8 +106,14 @@ export function useProgressStats(initialProfileId?: string | null): UseProgressS
       const data: ProfileDTO[] = await response.json();
       setProfiles(data);
 
+      // Handle empty profiles list - stop loading
+      if (data.length === 0) {
+        setIsLoading(false);
+        return data;
+      }
+
       // Auto-select first profile if no profile selected
-      if (!selectedProfileId && data.length > 0) {
+      if (!initialProfileId && data.length > 0) {
         setSelectedProfileId(data[0].id);
       }
 
@@ -115,10 +121,11 @@ export function useProgressStats(initialProfileId?: string | null): UseProgressS
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Nieznany błąd";
       setError(errorMessage);
+      setIsLoading(false);
       console.error("Error fetching profiles:", err);
       return [];
     }
-  }, [selectedProfileId]);
+  }, [initialProfileId]);
 
   /**
    * Fetch profile statistics
