@@ -55,7 +55,7 @@ export default function AppHeader() {
       }
 
       // Redirect to login page
-      window.location.href = "/login";
+      window.location.href = "/auth/login";
     } catch (error) {
       console.error("Logout error:", error);
       setIsLoggingOut(false);

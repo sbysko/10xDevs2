@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { CategoryDTO, CategoryProgressDTO, CategoriesListDTO } from "@/types";
+import { deleteCookie, getCookie } from "@/lib/utils";
 
 /**
  * Selected profile info from sessionStorage
@@ -87,6 +88,7 @@ export function useCategoriesManager(): UseCategoriesManagerReturn {
     const profileId = sessionStorage.getItem("selectedProfileId");
 
     if (!profileId) {
+      console.log("[useCategoriesManager] No profile ID in sessionStorage");
       return null;
     }
 
@@ -94,6 +96,11 @@ export function useCategoriesManager(): UseCategoriesManagerReturn {
     // (These could be set by /profiles page when selecting profile)
     const displayName = sessionStorage.getItem("selectedProfileName") || undefined;
     const avatarUrl = sessionStorage.getItem("selectedProfileAvatar") || undefined;
+
+    console.log("[useCategoriesManager] Selected profile from sessionStorage:", {
+      id: profileId,
+      display_name: displayName,
+    });
 
     return {
       id: profileId,
@@ -220,8 +227,13 @@ export function useCategoriesManager(): UseCategoriesManagerReturn {
    * Navigate back to profiles page
    */
   const goBackToProfiles = useCallback((): void => {
-    // Optionally clear selected profile
-    // sessionStorage.removeItem('selectedProfileId');
+    // Clear selected profile from sessionStorage to prevent auto-redirect
+    sessionStorage.removeItem("selectedProfileId");
+    sessionStorage.removeItem("selectedProfileName");
+    sessionStorage.removeItem("selectedProfileAvatar");
+
+    // Clear active profile cookie
+    deleteCookie("app_active_profile_id");
 
     // Navigate to profiles
     window.location.href = "/profiles";

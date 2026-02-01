@@ -5,13 +5,12 @@ import RegisterForm from "@/components/RegisterForm";
 // Disable prerendering for dynamic authentication
 export const prerender = false;
 
-// Server-side check: if user is already logged in, redirect to profiles
-const supabase = Astro.locals.supabase;
-const {
-  data: { session },
-} = await supabase.auth.getSession();
+// Server-side check handled by middleware
+// User is redirected from /auth/register if already authenticated
+const { user } = Astro.locals;
 
-if (session) {
+if (user) {
+  // This should not happen due to middleware, but defensive check
   return Astro.redirect("/profiles");
 }
 ---

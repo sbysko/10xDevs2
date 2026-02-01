@@ -1,13 +1,17 @@
 /**
- * Astro Middleware - Supabase Client Initialization
+ * Astro Middleware - Supabase Client Initialization & Authentication
  *
- * This middleware runs on every request and initializes the Supabase client
- * in context.locals, making it available to all API routes and pages.
+ * This middleware runs on every request and:
+ * 1. Initializes Supabase client with proper SSR cookie handling (getAll/setAll)
+ * 2. Validates user session using auth.getUser()
+ * 3. Protects routes and handles redirects
  *
- * Security:
- * - Uses PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY from environment variables
- * - Passes Authorization header to Supabase for JWT verification
- * - Client is automatically configured with user's session
+ * Security Features:
+ * - Uses @supabase/ssr recommended cookie methods (getAll/setAll ONLY)
+ * - Validates JWT on every request via auth.getUser()
+ * - Implements automatic session refresh
+ * - Protects all routes except PUBLIC_PATHS
+ * - Prevents authenticated users from accessing auth pages
  *
  * Usage in API routes:
  * ```typescript
@@ -23,23 +27,53 @@ import { defineMiddleware } from "astro:middleware";
 import type { SupabaseClient } from "@/db/supabase.client";
 
 /**
- * Public routes that don't require authentication
+ * Public paths - Accessible without authentication
+ *
+ * Includes:
+ * - Landing page (/)
+ * - Auth pages (/auth/*)
+ * - Auth API endpoints (/api/auth/*)
  */
-const PUBLIC_ROUTES = ["/login", "/register"];
+const PUBLIC_PATHS = [
+  // Landing page
+  "/",
+  // Server-Rendered Astro Pages
+  "/auth/login",
+  "/auth/register",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  // Auth API endpoints
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/logout",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
+];
 
 /**
- * Routes that should redirect to /profiles if user is authenticated
+ * Auth pages that should redirect to /profiles if user is authenticated
  */
-const AUTH_ROUTES = ["/login", "/register"];
+const AUTH_PAGES = ["/auth/login", "/auth/register", "/auth/forgot-password"];
+
+/**
+ * Parse Cookie header into array format required by getAll()
+ */
+function parseCookieHeader(cookieHeader: string): { name: string; value: string }[] {
+  if (!cookieHeader) return [];
+  return cookieHeader.split(";").map((cookie) => {
+    const [name, ...rest] = cookie.trim().split("=");
+    return { name, value: rest.join("=") };
+  });
+}
 
 /**
  * Middleware to initialize Supabase client and handle authentication
  *
  * Flow:
- * 1. Extract PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY from environment
- * 2. Create server-side Supabase client with cookie handling
- * 3. Attach client to context.locals.supabase
- * 4. Check authentication for protected routes
+ * 1. Create Supabase client with proper SSR cookie handling (getAll/setAll)
+ * 2. Validate user session with auth.getUser()
+ * 3. Attach user to context.locals if authenticated
+ * 4. Handle redirects based on authentication state
  * 5. Continue to next middleware/route handler
  */
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -55,42 +89,27 @@ export const onRequest = defineMiddleware(async (context, next) => {
   /**
    * Create server-side Supabase client with SSR support
    *
-   * This client handles:
-   * - Cookie-based session management
-   * - Authorization header (Bearer token) for API requests
-   * - Automatic token refresh
-   * - Server-side authentication
+   * CRITICAL: Must use getAll() and setAll() ONLY per @supabase/ssr requirements
+   * DO NOT use get(), set(), or remove() - these are deprecated and cause issues
    */
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       /**
-       * Get cookie value by name
-       * Used for reading session cookies
+       * Get ALL cookies at once
+       * Required by @supabase/ssr for proper session handling
        */
-      get(key: string) {
-        return context.cookies.get(key)?.value;
+      getAll() {
+        return parseCookieHeader(context.request.headers.get("Cookie") ?? "");
       },
 
       /**
-       * Set cookie with options
-       * Used for storing session tokens
+       * Set ALL cookies at once
+       * Required by @supabase/ssr for proper session handling
        */
-      set(key: string, value: string, options: Record<string, unknown>) {
-        context.cookies.set(key, value, options);
-      },
-
-      /**
-       * Remove cookie by name
-       * Used for logout/session cleanup
-       */
-      remove(key: string, options: Record<string, unknown>) {
-        context.cookies.delete(key, options);
-      },
-    },
-    // Pass Authorization header to Supabase for Bearer token authentication
-    global: {
-      headers: {
-        Authorization: context.request.headers.get("Authorization") || "",
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          context.cookies.set(name, value, options);
+        });
       },
     },
   });
@@ -111,28 +130,76 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  // Check if route is public
-  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname === route);
+  // Check if path is public
+  const isPublic = PUBLIC_PATHS.includes(pathname);
 
-  // Get user session
+  /**
+   * CRITICAL: Always call auth.getUser() to validate JWT
+   * DO NOT use getSession() - it doesn't verify the JWT
+   * This prevents security vulnerabilities from forged tokens
+   */
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  // If user is authenticated and trying to access auth routes (login/register)
-  // Redirect to profiles page
-  if (session && AUTH_ROUTES.includes(pathname)) {
-    return context.redirect("/profiles");
+  if (error) {
+    console.error("Auth error in middleware:", error);
+    // On auth error, treat as unauthenticated
   }
 
-  // If user is not authenticated and trying to access protected route
-  // Redirect to login with redirect query param
-  if (!session && !isPublicRoute) {
-    const redirectUrl = new URL("/login", context.url.origin);
+  // Store user in locals if authenticated
+  if (user) {
+    context.locals.user = {
+      id: user.id,
+      email: user.email || "",
+    };
+  }
+
+  // ============================================================================
+  // REDIRECT LOGIC - Universal Protection Mechanism
+  // ============================================================================
+
+  // 1. Authenticated user trying to access auth pages → redirect to /profiles
+  if (user && AUTH_PAGES.includes(pathname)) {
+    // IMPORTANT: Set cache control headers on redirect response
+    const response = context.redirect("/profiles");
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    return response;
+  }
+
+  // 2. Non-authenticated user on protected route → redirect to /auth/login
+  // This protects ALL routes except PUBLIC_PATHS (including home page "/")
+  if (!user && !isPublic) {
+    const redirectUrl = new URL("/auth/login", context.url.origin);
+    // Preserve original destination for post-login redirect
     if (pathname !== "/") {
       redirectUrl.searchParams.set("redirect", pathname);
     }
     return context.redirect(redirectUrl.toString());
+  }
+
+  // ============================================================================
+  // CACHE CONTROL - Prevent browser caching of auth pages
+  // ============================================================================
+  // This prevents the "back button" issue where users see cached auth pages
+  // after logging in. Without this, clicking browser "back" shows old login page.
+  // This applies to non-authenticated users viewing auth pages.
+  if (AUTH_PAGES.includes(pathname) || pathname.startsWith("/auth/")) {
+    // Get response from next handler
+    const response = await next();
+
+    // Clone response to modify headers (responses are immutable)
+    const newResponse = new Response(response.body, response);
+
+    // Set cache control headers to prevent caching
+    newResponse.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    newResponse.headers.set("Pragma", "no-cache");
+    newResponse.headers.set("Expires", "0");
+
+    return newResponse;
   }
 
   // Continue to next middleware or route handler

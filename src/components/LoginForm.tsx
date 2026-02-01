@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { createBrowserClient } from "@supabase/ssr";
 
 /**
  * Login form data interface
@@ -39,9 +38,6 @@ export default function LoginForm() {
   });
   const [error, setError] = useState<AuthError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Create Supabase client
-  const supabase = createBrowserClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 
   /**
    * Validate email format
@@ -95,35 +91,41 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      // Sign in with Supabase Auth
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      // Call API endpoint instead of direct Supabase
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
 
-      if (signInError) {
-        // Map Supabase errors to user-friendly messages
-        let errorMessage = "Wystąpił błąd podczas logowania";
+      const data = await response.json();
 
-        if (signInError.message.includes("Invalid login credentials")) {
-          errorMessage = "Nieprawidłowy email lub hasło";
-        } else if (signInError.message.includes("Email not confirmed")) {
-          errorMessage = "Potwierdź swój adres email";
-        } else if (signInError.message.includes("Too many requests")) {
-          errorMessage = "Zbyt wiele prób logowania. Spróbuj ponownie za chwilę";
-        }
-
-        setError({ message: errorMessage });
+      if (!response.ok) {
+        // Handle API errors
+        setError({ message: data.message || "Wystąpił błąd podczas logowania" });
         setIsLoading(false);
         return;
       }
 
-      // Get redirect URL from query params
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirect = urlParams.get("redirect") || "/profiles";
+      // SUCCESS - Redirect to /profiles
+      // Smart redirect logic (0→show create, 1→auto-select, 2+→select) is handled in profiles.astro
+      let redirectUrl = "/profiles";
 
-      // Redirect to profiles or original page
-      window.location.href = redirect;
+      // Check for redirect query param
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectParam = urlParams.get("redirect");
+
+      if (redirectParam) {
+        redirectUrl = redirectParam;
+      }
+
+      // Full page reload to refresh server session
+      window.location.href = redirectUrl;
     } catch (err) {
       console.error("Login error:", err);
       setError({ message: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie" });
@@ -183,6 +185,16 @@ export default function LoginForm() {
             />
           </div>
 
+          {/* Forgot password link */}
+          <div className="text-right">
+            <a
+              href="/auth/forgot-password"
+              className="text-sm font-medium text-purple-600 hover:text-purple-700 hover:underline"
+            >
+              Zapomniałeś hasła?
+            </a>
+          </div>
+
           {/* Submit button */}
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Logowanie..." : "Zaloguj się"}
@@ -193,7 +205,7 @@ export default function LoginForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Nie masz konta?{" "}
-            <a href="/register" className="font-medium text-purple-600 hover:text-purple-700 hover:underline">
+            <a href="/auth/register" className="font-medium text-purple-600 hover:text-purple-700 hover:underline">
               Zarejestruj się
             </a>
           </p>

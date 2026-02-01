@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { createBrowserClient } from "@supabase/ssr";
 
 /**
  * Register form data interface
@@ -25,7 +24,7 @@ interface AuthError {
 /**
  * RegisterForm Component
  *
- * Handles user registration with Supabase Auth.
+ * Handles user registration via API endpoint.
  * Features:
  * - Email/password registration
  * - Password confirmation
@@ -42,9 +41,6 @@ export default function RegisterForm() {
   });
   const [error, setError] = useState<AuthError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Create Supabase client
-  const supabase = createBrowserClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 
   /**
    * Validate email format
@@ -114,43 +110,46 @@ export default function RegisterForm() {
     setIsLoading(true);
 
     try {
-      // Sign up with Supabase Auth
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+      // Call API endpoint instead of direct Supabase
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
 
-      if (signUpError) {
-        // Map Supabase errors to user-friendly messages
-        let errorMessage = "Wystąpił błąd podczas rejestracji";
+      const data = await response.json();
 
-        if (signUpError.message.includes("User already registered")) {
-          errorMessage = "Ten adres email jest już zarejestrowany";
-        } else if (signUpError.message.includes("Invalid email")) {
-          errorMessage = "Nieprawidłowy format adresu email";
-        } else if (signUpError.message.includes("Password")) {
-          errorMessage = "Hasło nie spełnia wymagań bezpieczeństwa";
-        }
-
-        setError({ message: errorMessage });
+      if (!response.ok) {
+        setError({
+          message: data.message || "Wystąpił błąd podczas rejestracji",
+          field: data.field,
+        });
         setIsLoading(false);
         return;
       }
 
       // Check if email confirmation is required
-      if (data.user && !data.session) {
+      if (data.email_confirmation_required) {
         // Email confirmation is enabled - show message and redirect to login
         setError({
-          message: "Rejestracja udana! Sprawdź swoją skrzynkę email i potwierdź adres.",
+          message: data.message || "Rejestracja udana! Sprawdź swoją skrzynkę email i potwierdź adres.",
         });
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = "/auth/login";
         }, 3000);
         return;
       }
 
       // Auto-login successful (email confirmation disabled)
-      // Redirect to profiles page
+      // Add a small delay to ensure cookies are set before redirect
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Redirect to profiles page with full page reload to ensure session sync
       window.location.href = "/profiles";
     } catch (err) {
       console.error("Registration error:", err);
@@ -239,7 +238,7 @@ export default function RegisterForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Masz już konto?{" "}
-            <a href="/login" className="font-medium text-purple-600 hover:text-purple-700 hover:underline">
+            <a href="/auth/login" className="font-medium text-purple-600 hover:text-purple-700 hover:underline">
               Zaloguj się
             </a>
           </p>

@@ -21,6 +21,7 @@
 
 import { useCallback } from "react";
 import type { ProfileDTO } from "@/types";
+import { setCookie } from "@/lib/utils";
 
 interface ProfileCardProps {
   profile: ProfileDTO;
@@ -34,15 +35,25 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
   /**
    * Handle profile selection
    * - Save profile ID to sessionStorage
+   * - Set active profile cookie
    * - Navigate to game categories page
    */
   const handleSelect = useCallback(() => {
     // Store selected profile ID for game session
     sessionStorage.setItem("selectedProfileId", profile.id);
 
+    // Store profile display name and avatar for header display
+    sessionStorage.setItem("selectedProfileName", profile.display_name);
+    if (profile.avatar_url) {
+      sessionStorage.setItem("selectedProfileAvatar", profile.avatar_url);
+    }
+
+    // Set active profile cookie (30 days expiration)
+    setCookie("app_active_profile_id", profile.id, 30);
+
     // Navigate to game categories
     window.location.href = "/game/categories";
-  }, [profile.id]);
+  }, [profile.id, profile.display_name, profile.avatar_url]);
 
   // ===================================================================
   // AVATAR URL

@@ -23,35 +23,21 @@ export const prerender = false;
  * GET handler - List all child profiles for authenticated parent
  *
  * Flow:
- * 1. Authenticate: Validate JWT from Authorization header
+ * 1. Authenticate: Validate session from cookies (set by Astro middleware)
  * 2. Fetch: Call ProfileService to get all profiles (RLS filtered by parent_id)
  * 3. Return: 200 with array of profile DTOs
  *
  * Responses:
  * - 200 OK: Array of profiles (can be empty array if no profiles)
- * - 401 Unauthorized: Missing/invalid token
+ * - 401 Unauthorized: No valid session
  * - 500 Internal Server Error: Database error
  */
 export const GET: APIRoute = async (context) => {
   // ===================================================================
-  // STEP 1: AUTHENTICATION - Verify JWT token
+  // STEP 1: AUTHENTICATION - Verify session from cookies
   // ===================================================================
 
-  const authHeader = context.request.headers.get("Authorization");
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return new Response(
-      JSON.stringify({
-        error: "unauthorized",
-        message: "Authentication required",
-      }),
-      {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  }
-
+  // Get user from Supabase client (session from cookies via middleware)
   const {
     data: { user },
     error: authError,
@@ -63,7 +49,7 @@ export const GET: APIRoute = async (context) => {
     return new Response(
       JSON.stringify({
         error: "unauthorized",
-        message: "Invalid or expired token",
+        message: "Authentication required",
       }),
       {
         status: 401,
@@ -113,40 +99,24 @@ export const GET: APIRoute = async (context) => {
  * POST handler - Create new child profile
  *
  * Flow:
- * 1. Authenticate: Extract and validate JWT from Authorization header
+ * 1. Authenticate: Validate session from cookies (set by Astro middleware)
  * 2. Parse: Read and parse request body JSON
  * 3. Validate: Check input data with Zod schema
  * 4. Create: Call ProfileService to insert into database
  * 5. Return: 201 with created profile DTO
  *
  * Error handling:
- * - 401 if token missing or invalid
+ * - 401 if no valid session
  * - 400 if JSON parsing fails or validation fails
  * - 409 if profile limit exceeded (database trigger)
  * - 500 for unexpected database errors
  */
 export const POST: APIRoute = async (context) => {
   // ===================================================================
-  // STEP 1: AUTHENTICATION - Verify JWT token
+  // STEP 1: AUTHENTICATION - Verify session from cookies
   // ===================================================================
 
-  const authHeader = context.request.headers.get("Authorization");
-
-  // Check if Authorization header exists and has Bearer format
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return new Response(
-      JSON.stringify({
-        error: "unauthorized",
-        message: "Authentication required",
-      }),
-      {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  }
-
-  // Verify JWT token with Supabase Auth
+  // Get user from Supabase client (session from cookies via middleware)
   const {
     data: { user },
     error: authError,
@@ -158,7 +128,7 @@ export const POST: APIRoute = async (context) => {
     return new Response(
       JSON.stringify({
         error: "unauthorized",
-        message: "Invalid or expired token",
+        message: "Authentication required",
       }),
       {
         status: 401,

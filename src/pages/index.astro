@@ -1,6 +1,24 @@
 ---
+/**
+ * Home Page (/)
+ *
+ * Authentication Flow:
+ * - Unauthenticated users: See welcome page
+ * - Authenticated users: Redirect to /profiles
+ *
+ * This prevents logged-in users from seeing the landing page
+ * and ensures they go directly to the app.
+ */
 import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
+
+// Check if user is authenticated
+const user = Astro.locals.user;
+
+// Redirect authenticated users to profiles
+if (user) {
+  return Astro.redirect("/profiles");
+}
 ---
 
 <Layout>
