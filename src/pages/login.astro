@@ -1,0 +1,14 @@
+---
+/**
+ * Redirect /login → /auth/login
+ *
+ * This is a convenience redirect for users who type /login directly.
+ * The actual login page is at /auth/login.
+ */
+
+// Preserve query parameters (like ?redirect=/profiles)
+const url = new URL(Astro.request.url);
+const redirectPath = `/auth/login${url.search}`;
+
+return Astro.redirect(redirectPath, 308); // 308 = Permanent Redirect
+---

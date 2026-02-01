@@ -1,17 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-console.log('=== TEST FILE LOADED ===');
-console.log('describe:', typeof describe);
-console.log('it:', typeof it);
-console.log('expect:', typeof expect);
+console.log("=== TEST FILE LOADED ===");
+console.log("describe:", typeof describe);
+console.log("it:", typeof it);
+console.log("expect:", typeof expect);
 
-describe('Debug Test', () => {
-  console.log('=== INSIDE DESCRIBE ===');
+describe("Debug Test", () => {
+  console.log("=== INSIDE DESCRIBE ===");
 
-  it('should work', () => {
-    console.log('=== INSIDE TEST ===');
+  it("should work", () => {
+    console.log("=== INSIDE TEST ===");
     expect(true).toBe(true);
   });
 });
 
-console.log('=== TEST FILE END ===');
+console.log("=== TEST FILE END ===");

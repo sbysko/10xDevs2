@@ -15,18 +15,18 @@
  * - Performance target: Fetch progress tracker < 300ms
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useProgressStats } from './useProgressStats';
-import type { ProfileDTO, ProfileStatsDTO, CategoryProgressDTO, DetailedProgressItem } from '@/types';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { useProgressStats } from "./useProgressStats";
+import type { ProfileDTO, ProfileStatsDTO, CategoryProgressDTO, DetailedProgressItem } from "@/types";
 
 // ===================================================================
 // MOCKS
 // ===================================================================
 
 // Mock Supabase browser client
-vi.mock('@/lib/supabase-browser', () => ({
-  getAccessToken: vi.fn(() => Promise.resolve('mock-token-123')),
+vi.mock("@/lib/supabase-browser", () => ({
+  getAccessToken: vi.fn(() => Promise.resolve("mock-token-123")),
 }));
 
 // Mock fetch API
@@ -39,27 +39,27 @@ global.fetch = mockFetch;
 
 const mockProfiles: ProfileDTO[] = [
   {
-    id: 'profile-1',
-    parent_id: 'parent-123',
-    display_name: 'Maria',
-    avatar_url: 'avatars/avatar-1.svg',
-    language_code: 'pl',
-    created_at: '2026-01-01T00:00:00Z',
-    updated_at: '2026-01-01T00:00:00Z',
+    id: "profile-1",
+    parent_id: "parent-123",
+    display_name: "Maria",
+    avatar_url: "avatars/avatar-1.svg",
+    language_code: "pl",
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
   },
   {
-    id: 'profile-2',
-    parent_id: 'parent-123',
-    display_name: 'Jan',
-    avatar_url: 'avatars/avatar-2.svg',
-    language_code: 'pl',
-    created_at: '2026-01-02T00:00:00Z',
-    updated_at: '2026-01-02T00:00:00Z',
+    id: "profile-2",
+    parent_id: "parent-123",
+    display_name: "Jan",
+    avatar_url: "avatars/avatar-2.svg",
+    language_code: "pl",
+    created_at: "2026-01-02T00:00:00Z",
+    updated_at: "2026-01-02T00:00:00Z",
   },
 ];
 
 const mockStats: ProfileStatsDTO = {
-  profile_id: 'profile-1',
+  profile_id: "profile-1",
   total_stars: 45,
   words_mastered: 15,
   mastery_percentage: 6.0, // 15 / 250 * 100 = 6%
@@ -67,17 +67,17 @@ const mockStats: ProfileStatsDTO = {
 };
 
 const mockCategoryProgress: CategoryProgressDTO = {
-  profile_id: 'profile-1',
+  profile_id: "profile-1",
   categories: [
     {
-      category: 'zwierzeta',
+      category: "zwierzeta",
       total_words: 50,
       words_mastered: 5,
       mastery_percentage: 10.0,
       total_stars: 15,
     },
     {
-      category: 'owoce_warzywa',
+      category: "owoce_warzywa",
       total_words: 50,
       words_mastered: 10,
       mastery_percentage: 20.0,
@@ -88,22 +88,22 @@ const mockCategoryProgress: CategoryProgressDTO = {
 
 const mockMasteredWords: DetailedProgressItem[] = [
   {
-    vocabulary_id: 'word-1',
-    word_text: 'Kot',
-    category: 'zwierzeta',
+    vocabulary_id: "word-1",
+    word_text: "Kot",
+    category: "zwierzeta",
     is_mastered: true,
     stars_earned: 3,
     attempts_count: 1,
-    last_attempted_at: '2026-01-15T10:00:00Z',
+    last_attempted_at: "2026-01-15T10:00:00Z",
   },
   {
-    vocabulary_id: 'word-2',
-    word_text: 'Pies',
-    category: 'zwierzeta',
+    vocabulary_id: "word-2",
+    word_text: "Pies",
+    category: "zwierzeta",
     is_mastered: true,
     stars_earned: 2,
     attempts_count: 2,
-    last_attempted_at: '2026-01-15T11:00:00Z',
+    last_attempted_at: "2026-01-15T11:00:00Z",
   },
 ];
 
@@ -111,12 +111,12 @@ const mockMasteredWords: DetailedProgressItem[] = [
 // TEST SUITE: Statistics Aggregation
 // ===================================================================
 
-describe('useProgressStats - Statistics Aggregation', () => {
+describe("useProgressStats - Statistics Aggregation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should fetch and display all statistics correctly', async () => {
+  it("should fetch and display all statistics correctly", async () => {
     // Mock API responses
     mockFetch
       .mockResolvedValueOnce({
@@ -136,7 +136,7 @@ describe('useProgressStats - Statistics Aggregation', () => {
         json: async () => ({ progress: mockMasteredWords }),
       });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     // Wait for all data to load
     await waitFor(() => {
@@ -150,9 +150,9 @@ describe('useProgressStats - Statistics Aggregation', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('should calculate mastery percentage correctly for 0%', async () => {
+  it("should calculate mastery percentage correctly for 0%", async () => {
     const zeroMasteryStats: ProfileStatsDTO = {
-      profile_id: 'profile-1',
+      profile_id: "profile-1",
       total_stars: 0,
       words_mastered: 0,
       mastery_percentage: 0.0,
@@ -165,7 +165,7 @@ describe('useProgressStats - Statistics Aggregation', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => mockCategoryProgress })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ progress: [] }) });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -176,9 +176,9 @@ describe('useProgressStats - Statistics Aggregation', () => {
     expect(result.current.stats?.words_mastered).toBe(0);
   });
 
-  it('should calculate mastery percentage correctly for 50%', async () => {
+  it("should calculate mastery percentage correctly for 50%", async () => {
     const halfMasteryStats: ProfileStatsDTO = {
-      profile_id: 'profile-1',
+      profile_id: "profile-1",
       total_stars: 375,
       words_mastered: 125, // 125 / 250 = 50%
       mastery_percentage: 50.0,
@@ -191,7 +191,7 @@ describe('useProgressStats - Statistics Aggregation', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => mockCategoryProgress })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ progress: [] }) });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -202,9 +202,9 @@ describe('useProgressStats - Statistics Aggregation', () => {
     expect(result.current.stats?.words_mastered).toBe(125);
   });
 
-  it('should calculate mastery percentage correctly for 100%', async () => {
+  it("should calculate mastery percentage correctly for 100%", async () => {
     const fullMasteryStats: ProfileStatsDTO = {
-      profile_id: 'profile-1',
+      profile_id: "profile-1",
       total_stars: 750, // Perfect 3 stars × 250 words
       words_mastered: 250,
       mastery_percentage: 100.0,
@@ -217,7 +217,7 @@ describe('useProgressStats - Statistics Aggregation', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => mockCategoryProgress })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ progress: [] }) });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -228,13 +228,13 @@ describe('useProgressStats - Statistics Aggregation', () => {
     expect(result.current.stats?.words_mastered).toBe(250);
   });
 
-  it('should sum total stars correctly across categories', async () => {
+  it("should sum total stars correctly across categories", async () => {
     const categoryStatsWithStars: CategoryProgressDTO = {
-      profile_id: 'profile-1',
+      profile_id: "profile-1",
       categories: [
-        { category: 'zwierzeta', total_words: 50, words_mastered: 10, mastery_percentage: 20, total_stars: 25 },
-        { category: 'owoce_warzywa', total_words: 50, words_mastered: 8, mastery_percentage: 16, total_stars: 20 },
-        { category: 'pojazdy', total_words: 50, words_mastered: 5, mastery_percentage: 10, total_stars: 12 },
+        { category: "zwierzeta", total_words: 50, words_mastered: 10, mastery_percentage: 20, total_stars: 25 },
+        { category: "owoce_warzywa", total_words: 50, words_mastered: 8, mastery_percentage: 16, total_stars: 20 },
+        { category: "pojazdy", total_words: 50, words_mastered: 5, mastery_percentage: 10, total_stars: 12 },
       ],
     };
 
@@ -244,7 +244,7 @@ describe('useProgressStats - Statistics Aggregation', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => categoryStatsWithStars })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ progress: [] }) });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -260,12 +260,12 @@ describe('useProgressStats - Statistics Aggregation', () => {
 // TEST SUITE: Profile Selection
 // ===================================================================
 
-describe('useProgressStats - Profile Selection', () => {
+describe("useProgressStats - Profile Selection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should auto-select first profile if none provided', async () => {
+  it("should auto-select first profile if none provided", async () => {
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => mockProfiles })
       .mockResolvedValueOnce({ ok: true, json: async () => mockStats })
@@ -279,27 +279,27 @@ describe('useProgressStats - Profile Selection', () => {
     });
 
     // Assert: First profile auto-selected
-    expect(result.current.selectedProfileId).toBe('profile-1');
+    expect(result.current.selectedProfileId).toBe("profile-1");
   });
 
-  it('should use initial profile if provided', async () => {
+  it("should use initial profile if provided", async () => {
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => mockProfiles })
       .mockResolvedValueOnce({ ok: true, json: async () => mockStats })
       .mockResolvedValueOnce({ ok: true, json: async () => mockCategoryProgress })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ progress: [] }) });
 
-    const { result } = renderHook(() => useProgressStats('profile-2'));
+    const { result } = renderHook(() => useProgressStats("profile-2"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
     // Assert: Initial profile used
-    expect(result.current.selectedProfileId).toBe('profile-2');
+    expect(result.current.selectedProfileId).toBe("profile-2");
   });
 
-  it('should refetch data when profile changes', async () => {
+  it("should refetch data when profile changes", async () => {
     // Initial profile data
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => mockProfiles })
@@ -307,18 +307,18 @@ describe('useProgressStats - Profile Selection', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => mockCategoryProgress })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ progress: [] }) });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.selectedProfileId).toBe('profile-1');
+    expect(result.current.selectedProfileId).toBe("profile-1");
 
     // New profile data
     const profile2Stats: ProfileStatsDTO = {
       ...mockStats,
-      profile_id: 'profile-2',
+      profile_id: "profile-2",
       total_stars: 30,
     };
 
@@ -329,7 +329,7 @@ describe('useProgressStats - Profile Selection', () => {
 
     // Act: Change profile
     act(() => {
-      result.current.selectProfile('profile-2');
+      result.current.selectProfile("profile-2");
     });
 
     // Wait for loading to start
@@ -346,7 +346,7 @@ describe('useProgressStats - Profile Selection', () => {
     );
 
     // Assert: New data fetched
-    expect(result.current.selectedProfileId).toBe('profile-2');
+    expect(result.current.selectedProfileId).toBe("profile-2");
     expect(result.current.stats?.total_stars).toBe(30);
   });
 });
@@ -355,12 +355,12 @@ describe('useProgressStats - Profile Selection', () => {
 // TEST SUITE: Parallel Data Loading
 // ===================================================================
 
-describe('useProgressStats - Parallel Loading', () => {
+describe("useProgressStats - Parallel Loading", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should fetch all data in parallel for performance', async () => {
+  it("should fetch all data in parallel for performance", async () => {
     const fetchStartTime = Date.now();
 
     // All responses resolve immediately
@@ -370,7 +370,7 @@ describe('useProgressStats - Parallel Loading', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => mockCategoryProgress })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ progress: mockMasteredWords }) });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -388,14 +388,14 @@ describe('useProgressStats - Parallel Loading', () => {
     expect(fetchDuration).toBeLessThan(1000); // Very generous for test env
   });
 
-  it('should handle partial failure gracefully (non-critical mastered words)', async () => {
+  it("should handle partial failure gracefully (non-critical mastered words)", async () => {
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => mockProfiles })
       .mockResolvedValueOnce({ ok: true, json: async () => mockStats })
       .mockResolvedValueOnce({ ok: true, json: async () => mockCategoryProgress })
-      .mockRejectedValueOnce(new Error('Network error')); // Mastered words fails
+      .mockRejectedValueOnce(new Error("Network error")); // Mastered words fails
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -413,21 +413,19 @@ describe('useProgressStats - Parallel Loading', () => {
 // TEST SUITE: Error Handling
 // ===================================================================
 
-describe('useProgressStats - Error Handling', () => {
+describe("useProgressStats - Error Handling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should handle 401 unauthorized error', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ ok: true, json: async () => mockProfiles })
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        json: async () => ({ error: 'unauthorized' }),
-      });
+  it("should handle 401 unauthorized error", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockProfiles }).mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: "unauthorized" }),
+    });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -438,57 +436,53 @@ describe('useProgressStats - Error Handling', () => {
     expect(result.current.stats).toBeNull();
   });
 
-  it('should handle 404 profile not found', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ ok: true, json: async () => mockProfiles })
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        json: async () => ({ error: 'not_found' }),
-      });
+  it("should handle 404 profile not found", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockProfiles }).mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      json: async () => ({ error: "not_found" }),
+    });
 
-    const { result } = renderHook(() => useProgressStats('profile-999'));
+    const { result } = renderHook(() => useProgressStats("profile-999"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
     // Assert: 404 error handled
-    expect(result.current.error).toBe('Profil nie został znaleziony');
+    expect(result.current.error).toBe("Profil nie został znaleziony");
   });
 
-  it('should handle 403 forbidden access', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ ok: true, json: async () => mockProfiles })
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 403,
-        json: async () => ({ error: 'forbidden' }),
-      });
+  it("should handle 403 forbidden access", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockProfiles }).mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      json: async () => ({ error: "forbidden" }),
+    });
 
-    const { result } = renderHook(() => useProgressStats('profile-other'));
+    const { result } = renderHook(() => useProgressStats("profile-other"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
     // Assert: Access denied error
-    expect(result.current.error).toBe('Brak dostępu do tego profilu');
+    expect(result.current.error).toBe("Brak dostępu do tego profilu");
   });
 
-  it('should allow manual refetch after error', async () => {
+  it("should allow manual refetch after error", async () => {
     // First attempt fails
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => mockProfiles })
-      .mockRejectedValueOnce(new Error('Network error'));
+      .mockRejectedValueOnce(new Error("Network error"));
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.error).toBe('Network error');
+    expect(result.current.error).toBe("Network error");
 
     // Second attempt succeeds
     mockFetch
@@ -511,14 +505,14 @@ describe('useProgressStats - Error Handling', () => {
 // TEST SUITE: Edge Cases
 // ===================================================================
 
-describe('useProgressStats - Edge Cases', () => {
+describe("useProgressStats - Edge Cases", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should handle profile with no progress (0 words attempted)', async () => {
+  it("should handle profile with no progress (0 words attempted)", async () => {
     const emptyStats: ProfileStatsDTO = {
-      profile_id: 'profile-1',
+      profile_id: "profile-1",
       total_stars: 0,
       words_mastered: 0,
       mastery_percentage: 0.0,
@@ -526,7 +520,7 @@ describe('useProgressStats - Edge Cases', () => {
     };
 
     const emptyCategories: CategoryProgressDTO = {
-      profile_id: 'profile-1',
+      profile_id: "profile-1",
       categories: [],
     };
 
@@ -536,7 +530,7 @@ describe('useProgressStats - Edge Cases', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => emptyCategories })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ progress: [] }) });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -548,7 +542,7 @@ describe('useProgressStats - Edge Cases', () => {
     expect(result.current.categoryProgress?.categories).toEqual([]);
   });
 
-  it('should handle empty profiles list', async () => {
+  it("should handle empty profiles list", async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [] });
 
     const { result } = renderHook(() => useProgressStats());
@@ -566,7 +560,7 @@ describe('useProgressStats - Edge Cases', () => {
     expect(result.current.stats).toBeNull();
   });
 
-  it('should filter mastered words correctly by profile_id', async () => {
+  it("should filter mastered words correctly by profile_id", async () => {
     const profile1Words: DetailedProgressItem[] = mockMasteredWords;
 
     mockFetch
@@ -575,7 +569,7 @@ describe('useProgressStats - Edge Cases', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => mockCategoryProgress })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ progress: profile1Words }) });
 
-    const { result } = renderHook(() => useProgressStats('profile-1'));
+    const { result } = renderHook(() => useProgressStats("profile-1"));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -586,7 +580,7 @@ describe('useProgressStats - Edge Cases', () => {
 
     // Verify API call included profile_id filter
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/profiles/profile-1/progress'),
+      expect.stringContaining("/api/profiles/profile-1/progress"),
       expect.any(Object)
     );
   });

@@ -1,148 +1,67 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FormField } from "@/components/forms/FormField";
+import { ResetPasswordSchema, type ResetPasswordInput } from "@/lib/validation/auth.schemas";
 
-/**
- * Reset password form data interface
- */
-interface ResetPasswordFormData {
-  password: string;
-  confirmPassword: string;
-}
-
-/**
- * Authentication error interface
- */
-interface AuthError {
-  message: string;
-  field?: "password" | "confirmPassword";
-  type: "error" | "success";
-}
-
-/**
- * ResetPasswordForm Component
- *
- * Handles password reset with Supabase Auth.
- * Features:
- * - New password input with confirmation
- * - Client-side validation
- * - Success/error handling with user-friendly messages
- * - Auto-redirect to login after successful reset
- */
 export default function ResetPasswordForm() {
-  const [formData, setFormData] = useState<ResetPasswordFormData>({
-    password: "",
-    confirmPassword: "",
-  });
-  const [message, setMessage] = useState<AuthError | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<{ text: string; type: "error" | "success" } | null>(null);
   const [hasToken, setHasToken] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
-  /**
-   * Check if we have access_token in URL hash (from Supabase email link)
-   */
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ResetPasswordInput>({
+    resolver: zodResolver(ResetPasswordSchema),
+    mode: "onBlur",
+  });
+
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get("access_token");
-
-    if (accessToken) {
-      setHasToken(true);
-    } else {
-      setHasToken(false);
-    }
+    setHasToken(!!accessToken);
   }, []);
 
-  /**
-   * Handle input change
-   */
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear message when user starts typing
+  useEffect(() => {
+    if (redirectUrl) {
+      const timer = setTimeout(() => {
+        window.location.href = redirectUrl;
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [redirectUrl]);
+
+  const onSubmit = async (data: ResetPasswordInput) => {
     setMessage(null);
-  }, []);
-
-  /**
-   * Handle form submission
-   */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage(null);
-
-    // Client-side validation
-    if (!formData.password) {
-      setMessage({ message: "Wprowadź nowe hasło", field: "password", type: "error" });
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setMessage({
-        message: "Hasło musi mieć minimum 8 znaków",
-        field: "password",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!formData.confirmPassword) {
-      setMessage({
-        message: "Potwierdź hasło",
-        field: "confirmPassword",
-        type: "error",
-      });
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setMessage({
-        message: "Hasła nie są identyczne",
-        field: "confirmPassword",
-        type: "error",
-      });
-      return;
-    }
-
-    setIsLoading(true);
 
     try {
-      // Call API endpoint instead of direct Supabase
       const response = await fetch("/api/auth/reset-password", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password: formData.password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: data.password }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        setMessage({ message: data.message || "Wystąpił błąd. Spróbuj ponownie", type: "error" });
-        setIsLoading(false);
+        setMessage({ text: result.message || "Wystąpił błąd. Spróbuj ponownie", type: "error" });
         return;
       }
 
-      // Success - show confirmation message
       setMessage({
-        message: "Hasło zostało pomyślnie zmienione! Za chwilę zostaniesz przekierowany do logowania.",
+        text: "Hasło zostało pomyślnie zmienione! Za chwilę zostaniesz przekierowany do logowania.",
         type: "success",
       });
-      setIsLoading(false);
-
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        window.location.href = "/auth/login";
-      }, 2000);
-    } catch (err) {
-      console.error("Reset password error:", err);
-      setMessage({ message: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie", type: "error" });
-      setIsLoading(false);
+      setRedirectUrl("/auth/login");
+    } catch {
+      setMessage({ text: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie", type: "error" });
     }
   };
 
-  // Show error if token is invalid
   if (!hasToken) {
     return (
       <div className="w-full max-w-md mx-auto">
@@ -174,63 +93,44 @@ export default function ResetPasswordForm() {
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white rounded-lg shadow-lg p-8">
-        {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Ustaw nowe hasło</h1>
           <p className="text-gray-600">Wprowadź nowe hasło do swojego konta</p>
         </div>
 
-        {/* Error/Success alert */}
         {message && (
           <Alert variant={message.type === "error" ? "destructive" : "default"} className="mb-4">
-            <AlertDescription>{message.message}</AlertDescription>
+            <AlertDescription>{message.text}</AlertDescription>
           </Alert>
         )}
 
-        {/* Reset password form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Password field */}
-          <div>
-            <Label htmlFor="password">Nowe hasło</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className={message?.field === "password" ? "border-red-500" : ""}
-              disabled={isLoading}
-              autoComplete="new-password"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">Minimum 8 znaków</p>
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            label="Nowe hasło"
+            type="password"
+            placeholder="••••••••"
+            registration={register("password")}
+            error={errors.password}
+            disabled={isSubmitting}
+            autoComplete="new-password"
+            hint="Minimum 8 znaków"
+          />
 
-          {/* Confirm password field */}
-          <div>
-            <Label htmlFor="confirmPassword">Potwierdź hasło</Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className={message?.field === "confirmPassword" ? "border-red-500" : ""}
-              disabled={isLoading}
-              autoComplete="new-password"
-              required
-            />
-          </div>
+          <FormField
+            label="Potwierdź hasło"
+            type="password"
+            placeholder="••••••••"
+            registration={register("confirmPassword")}
+            error={errors.confirmPassword}
+            disabled={isSubmitting}
+            autoComplete="new-password"
+          />
 
-          {/* Submit button */}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Resetowanie..." : "Zresetuj hasło"}
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Resetowanie..." : "Zresetuj hasło"}
           </Button>
         </form>
 
-        {/* Login link */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Pamiętasz hasło?{" "}

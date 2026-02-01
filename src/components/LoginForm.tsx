@@ -1,191 +1,97 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FormField } from "@/components/forms/FormField";
+import { LoginSchema, type LoginInput } from "@/lib/validation/auth.schemas";
 
-/**
- * Login form data interface
- */
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
-/**
- * Authentication error interface
- */
-interface AuthError {
-  message: string;
-  field?: "email" | "password";
-}
-
-/**
- * LoginForm Component
- *
- * Handles user authentication with Supabase Auth.
- * Features:
- * - Email/password login
- * - Client-side validation
- * - Error handling with user-friendly messages
- * - Redirect after successful login
- * - Link to registration page
- */
 export default function LoginForm() {
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: "",
-    password: "",
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(LoginSchema),
+    mode: "onBlur",
   });
-  const [error, setError] = useState<AuthError | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  /**
-   * Validate email format
-   */
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  /**
-   * Handle input change
-   */
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    setError(null);
-  }, []);
-
-  /**
-   * Handle form submission
-   */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    // Client-side validation
-    if (!formData.email) {
-      setError({ message: "Wprowadź adres email", field: "email" });
-      return;
+  useEffect(() => {
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
     }
+  }, [redirectUrl]);
 
-    if (!validateEmail(formData.email)) {
-      setError({ message: "Wprowadź poprawny adres email", field: "email" });
-      return;
-    }
-
-    if (!formData.password) {
-      setError({ message: "Wprowadź hasło", field: "password" });
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError({
-        message: "Hasło musi mieć minimum 8 znaków",
-        field: "password",
-      });
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: LoginInput) => {
+    setApiError(null);
 
     try {
-      // Call API endpoint instead of direct Supabase
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        // Handle API errors
-        setError({ message: data.message || "Wystąpił błąd podczas logowania" });
-        setIsLoading(false);
+        setApiError(result.message || "Wystąpił błąd podczas logowania");
         return;
       }
 
-      // SUCCESS - Redirect to /profiles
-      // Smart redirect logic (0→show create, 1→auto-select, 2+→select) is handled in profiles.astro
-      let redirectUrl = "/profiles";
-
-      // Check for redirect query param
+      // Smart redirect logic
+      let targetUrl = "/profiles";
       const urlParams = new URLSearchParams(window.location.search);
       const redirectParam = urlParams.get("redirect");
 
       if (redirectParam) {
-        redirectUrl = redirectParam;
+        targetUrl = redirectParam;
       }
 
-      // Full page reload to refresh server session
-      window.location.href = redirectUrl;
-    } catch (err) {
-      console.error("Login error:", err);
-      setError({ message: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie" });
-      setIsLoading(false);
+      setRedirectUrl(targetUrl);
+    } catch {
+      setApiError("Wystąpił nieoczekiwany błąd. Spróbuj ponownie");
     }
   };
 
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white rounded-lg shadow-lg p-8">
-        {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Witaj ponownie!</h1>
           <p className="text-gray-600">Zaloguj się do swojego konta</p>
         </div>
 
-        {/* Error alert */}
-        {error && (
+        {apiError && (
           <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error.message}</AlertDescription>
+            <AlertDescription>{apiError}</AlertDescription>
           </Alert>
         )}
 
-        {/* Login form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email field */}
-          <div>
-            <Label htmlFor="email">Adres email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="rodzic@example.com"
-              className={error?.field === "email" ? "border-red-500" : ""}
-              disabled={isLoading}
-              autoComplete="email"
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            label="Adres email"
+            type="email"
+            placeholder="rodzic@example.com"
+            registration={register("email")}
+            error={errors.email}
+            disabled={isSubmitting}
+            autoComplete="email"
+          />
 
-          {/* Password field */}
-          <div>
-            <Label htmlFor="password">Hasło</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className={error?.field === "password" ? "border-red-500" : ""}
-              disabled={isLoading}
-              autoComplete="current-password"
-              required
-            />
-          </div>
+          <FormField
+            label="Hasło"
+            type="password"
+            placeholder="••••••••"
+            registration={register("password")}
+            error={errors.password}
+            disabled={isSubmitting}
+            autoComplete="current-password"
+          />
 
-          {/* Forgot password link */}
           <div className="text-right">
             <a
               href="/auth/forgot-password"
@@ -195,13 +101,11 @@ export default function LoginForm() {
             </a>
           </div>
 
-          {/* Submit button */}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Logowanie..." : "Zaloguj się"}
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Logowanie..." : "Zaloguj się"}
           </Button>
         </form>
 
-        {/* Register link */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Nie masz konta?{" "}

@@ -1,18 +1,18 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
   test: {
     // Use jsdom environment for React components and hooks testing
-    environment: 'jsdom',
+    environment: "jsdom",
 
     // Pool configuration for Vitest 4 (new format)
-    pool: 'forks',
+    pool: "forks",
     poolMatchGlobs: [
-      ['**/*.test.ts', 'forks'],
-      ['**/*.test.tsx', 'forks'],
+      ["**/*.test.ts", "forks"],
+      ["**/*.test.tsx", "forks"],
     ],
 
     // Forks pool options (Vitest 4 format)
@@ -23,16 +23,16 @@ export default defineConfig({
 
     // Coverage configuration
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      provider: "v8",
+      reporter: ["text", "json", "html"],
       exclude: [
-        'node_modules/',
-        'src/test/',
-        '**/*.test.ts',
-        '**/*.test.tsx',
-        '**/*.config.*',
-        '**/types.ts',
-        '**/database.types.ts',
+        "node_modules/",
+        "src/test/",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.config.*",
+        "**/types.ts",
+        "**/database.types.ts",
       ],
       // Recommended thresholds for critical code
       thresholds: {
@@ -44,7 +44,7 @@ export default defineConfig({
     },
 
     // Test file patterns
-    include: ['**/*.test.ts', '**/*.test.tsx'],
+    include: ["**/*.test.ts", "**/*.test.tsx"],
 
     // Timeout for async tests
     testTimeout: 10000,
@@ -52,7 +52,7 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
 });

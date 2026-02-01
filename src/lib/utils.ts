@@ -36,7 +36,7 @@ function isProduction(): boolean {
 /**
  * Set cookie with options
  */
-export function setCookie(name: string, value: string, days: number = 30): void {
+export function setCookie(name: string, value: string, days = 30): void {
   if (typeof document === "undefined") {
     return;
   }
@@ -70,7 +70,7 @@ export function deleteCookie(name: string): void {
  */
 export function normalizeAvatarUrl(
   avatarUrl: string | null | undefined,
-  fallback: string = "/avatars/default-avatar.svg",
+  fallback = "/avatars/default-avatar.svg"
 ): string {
   if (!avatarUrl) {
     return fallback;

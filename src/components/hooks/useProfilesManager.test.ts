@@ -14,18 +14,18 @@
  * - RLS ensures parent can only access their own children
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useProfilesManager } from './useProfilesManager';
-import type { ProfileDTO } from '@/types';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { useProfilesManager } from "./useProfilesManager";
+import type { ProfileDTO } from "@/types";
 
 // ===================================================================
 // MOCKS
 // ===================================================================
 
 // Mock Supabase browser client
-vi.mock('@/lib/supabase-browser', () => ({
-  getAccessToken: vi.fn(() => Promise.resolve('mock-token-123')),
+vi.mock("@/lib/supabase-browser", () => ({
+  getAccessToken: vi.fn(() => Promise.resolve("mock-token-123")),
 }));
 
 // Mock fetch API
@@ -38,45 +38,45 @@ global.fetch = mockFetch;
 
 const mockProfiles: ProfileDTO[] = [
   {
-    id: 'profile-1',
-    parent_id: 'parent-123',
-    display_name: 'Maria',
-    avatar_url: 'avatars/avatar-1.svg',
-    language_code: 'pl',
-    created_at: '2026-01-01T00:00:00Z',
-    updated_at: '2026-01-01T00:00:00Z',
+    id: "profile-1",
+    parent_id: "parent-123",
+    display_name: "Maria",
+    avatar_url: "avatars/avatar-1.svg",
+    language_code: "pl",
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
   },
   {
-    id: 'profile-2',
-    parent_id: 'parent-123',
-    display_name: 'Jan',
-    avatar_url: 'avatars/avatar-2.svg',
-    language_code: 'pl',
-    created_at: '2026-01-02T00:00:00Z',
-    updated_at: '2026-01-02T00:00:00Z',
+    id: "profile-2",
+    parent_id: "parent-123",
+    display_name: "Jan",
+    avatar_url: "avatars/avatar-2.svg",
+    language_code: "pl",
+    created_at: "2026-01-02T00:00:00Z",
+    updated_at: "2026-01-02T00:00:00Z",
   },
 ];
 
 const mockNewProfile: ProfileDTO = {
-  id: 'profile-3',
-  parent_id: 'parent-123',
-  display_name: 'Zofia',
-  avatar_url: 'avatars/avatar-3.svg',
-  language_code: 'pl',
-  created_at: '2026-01-03T00:00:00Z',
-  updated_at: '2026-01-03T00:00:00Z',
+  id: "profile-3",
+  parent_id: "parent-123",
+  display_name: "Zofia",
+  avatar_url: "avatars/avatar-3.svg",
+  language_code: "pl",
+  created_at: "2026-01-03T00:00:00Z",
+  updated_at: "2026-01-03T00:00:00Z",
 };
 
 // ===================================================================
 // TEST SUITE: Profile Fetching
 // ===================================================================
 
-describe('useProfilesManager - Profile Fetching', () => {
+describe("useProfilesManager - Profile Fetching", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should fetch profiles on mount', async () => {
+  it("should fetch profiles on mount", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -99,17 +99,17 @@ describe('useProfilesManager - Profile Fetching', () => {
     expect(result.current.error).toBeNull();
 
     // Verify API call
-    expect(mockFetch).toHaveBeenCalledWith('/api/profiles', {
-      method: 'GET',
+    expect(mockFetch).toHaveBeenCalledWith("/api/profiles", {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer mock-token-123',
+        "Content-Type": "application/json",
+        Authorization: "Bearer mock-token-123",
       },
-      credentials: 'include',
+      credentials: "include",
     });
   });
 
-  it('should handle empty profiles list', async () => {
+  it("should handle empty profiles list", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -128,11 +128,11 @@ describe('useProfilesManager - Profile Fetching', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('should handle 401 unauthorized error', async () => {
+  it("should handle 401 unauthorized error", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 401,
-      json: async () => ({ error: 'unauthorized' }),
+      json: async () => ({ error: "unauthorized" }),
     });
 
     const { result } = renderHook(() => useProfilesManager());
@@ -142,12 +142,12 @@ describe('useProfilesManager - Profile Fetching', () => {
     });
 
     // Assert: Error state set
-    expect(result.current.error).toBe('Musisz być zalogowany, aby zobaczyć profile');
+    expect(result.current.error).toBe("Musisz być zalogowany, aby zobaczyć profile");
     expect(result.current.profiles).toEqual([]);
   });
 
-  it('should handle network errors gracefully', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+  it("should handle network errors gracefully", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
     const { result } = renderHook(() => useProfilesManager());
 
@@ -156,7 +156,7 @@ describe('useProfilesManager - Profile Fetching', () => {
     });
 
     // Assert: Error captured
-    expect(result.current.error).toBe('Network error');
+    expect(result.current.error).toBe("Network error");
     expect(result.current.profiles).toEqual([]);
   });
 });
@@ -165,12 +165,12 @@ describe('useProfilesManager - Profile Fetching', () => {
 // TEST SUITE: Profile Limit Enforcement (Max 5)
 // ===================================================================
 
-describe('useProfilesManager - Profile Limit', () => {
+describe("useProfilesManager - Profile Limit", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should allow adding profile when count < 5', async () => {
+  it("should allow adding profile when count < 5", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -192,16 +192,16 @@ describe('useProfilesManager - Profile Limit', () => {
       result.current.openParentalGate();
     });
 
-    expect(result.current.activeModal).toBe('parental_gate');
+    expect(result.current.activeModal).toBe("parental_gate");
     expect(result.current.error).toBeNull();
   });
 
-  it('should block adding profile when count = 5', async () => {
+  it("should block adding profile when count = 5", async () => {
     const fiveProfiles: ProfileDTO[] = [
       ...mockProfiles,
-      { ...mockNewProfile, id: 'profile-3', display_name: 'Zofia' },
-      { ...mockNewProfile, id: 'profile-4', display_name: 'Kasia' },
-      { ...mockNewProfile, id: 'profile-5', display_name: 'Tomek' },
+      { ...mockNewProfile, id: "profile-3", display_name: "Zofia" },
+      { ...mockNewProfile, id: "profile-4", display_name: "Kasia" },
+      { ...mockNewProfile, id: "profile-5", display_name: "Tomek" },
     ];
 
     mockFetch.mockResolvedValueOnce({
@@ -226,15 +226,15 @@ describe('useProfilesManager - Profile Limit', () => {
     });
 
     // Assert: Modal not opened, error set
-    expect(result.current.activeModal).toBe('none');
-    expect(result.current.error).toBe('Osiągnięto maksymalną liczbę profili (5)');
+    expect(result.current.activeModal).toBe("none");
+    expect(result.current.error).toBe("Osiągnięto maksymalną liczbę profili (5)");
   });
 
-  it('should recalculate canAddProfile after profile creation', async () => {
+  it("should recalculate canAddProfile after profile creation", async () => {
     const fourProfiles: ProfileDTO[] = [
       ...mockProfiles,
-      { ...mockNewProfile, id: 'profile-3', display_name: 'Zofia' },
-      { ...mockNewProfile, id: 'profile-4', display_name: 'Kasia' },
+      { ...mockNewProfile, id: "profile-3", display_name: "Zofia" },
+      { ...mockNewProfile, id: "profile-4", display_name: "Kasia" },
     ];
 
     mockFetch.mockResolvedValueOnce({
@@ -256,8 +256,8 @@ describe('useProfilesManager - Profile Limit', () => {
     // Act: Add 5th profile
     const fifthProfile: ProfileDTO = {
       ...mockNewProfile,
-      id: 'profile-5',
-      display_name: 'Tomek',
+      id: "profile-5",
+      display_name: "Tomek",
     };
 
     act(() => {
@@ -274,7 +274,7 @@ describe('useProfilesManager - Profile Limit', () => {
 // TEST SUITE: Profile Creation
 // ===================================================================
 
-describe('useProfilesManager - Profile Creation', () => {
+describe("useProfilesManager - Profile Creation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -285,7 +285,7 @@ describe('useProfilesManager - Profile Creation', () => {
     });
   });
 
-  it('should add new profile to state after creation', async () => {
+  it("should add new profile to state after creation", async () => {
     const { result } = renderHook(() => useProfilesManager());
 
     await waitFor(() => {
@@ -305,7 +305,7 @@ describe('useProfilesManager - Profile Creation', () => {
     expect(result.current.profiles[1]).toEqual(mockProfiles[0]);
   });
 
-  it('should close modal after profile creation', async () => {
+  it("should close modal after profile creation", async () => {
     const { result } = renderHook(() => useProfilesManager());
 
     await waitFor(() => {
@@ -317,7 +317,7 @@ describe('useProfilesManager - Profile Creation', () => {
       result.current.openCreateProfile();
     });
 
-    expect(result.current.activeModal).toBe('create_profile');
+    expect(result.current.activeModal).toBe("create_profile");
 
     // Act: Handle profile created
     act(() => {
@@ -325,7 +325,7 @@ describe('useProfilesManager - Profile Creation', () => {
     });
 
     // Assert: Modal closed
-    expect(result.current.activeModal).toBe('none');
+    expect(result.current.activeModal).toBe("none");
   });
 });
 
@@ -333,7 +333,7 @@ describe('useProfilesManager - Profile Creation', () => {
 // TEST SUITE: Modal State Management
 // ===================================================================
 
-describe('useProfilesManager - Modal Management', () => {
+describe("useProfilesManager - Modal Management", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -344,7 +344,7 @@ describe('useProfilesManager - Modal Management', () => {
     });
   });
 
-  it('should manage modal state transitions correctly', async () => {
+  it("should manage modal state transitions correctly", async () => {
     const { result } = renderHook(() => useProfilesManager());
 
     await waitFor(() => {
@@ -352,28 +352,28 @@ describe('useProfilesManager - Modal Management', () => {
     });
 
     // Initial state: no modal
-    expect(result.current.activeModal).toBe('none');
+    expect(result.current.activeModal).toBe("none");
 
     // Flow: User clicks "Add Profile" → Parental Gate
     act(() => {
       result.current.openParentalGate();
     });
-    expect(result.current.activeModal).toBe('parental_gate');
+    expect(result.current.activeModal).toBe("parental_gate");
 
     // Flow: Parent passes gate → Create Profile Modal
     act(() => {
       result.current.openCreateProfile();
     });
-    expect(result.current.activeModal).toBe('create_profile');
+    expect(result.current.activeModal).toBe("create_profile");
 
     // Flow: User closes modal
     act(() => {
       result.current.closeModal();
     });
-    expect(result.current.activeModal).toBe('none');
+    expect(result.current.activeModal).toBe("none");
   });
 
-  it('should allow direct close from any modal state', async () => {
+  it("should allow direct close from any modal state", async () => {
     const { result } = renderHook(() => useProfilesManager());
 
     await waitFor(() => {
@@ -384,13 +384,13 @@ describe('useProfilesManager - Modal Management', () => {
     act(() => {
       result.current.openParentalGate();
     });
-    expect(result.current.activeModal).toBe('parental_gate');
+    expect(result.current.activeModal).toBe("parental_gate");
 
     // Close directly without completing flow
     act(() => {
       result.current.closeModal();
     });
-    expect(result.current.activeModal).toBe('none');
+    expect(result.current.activeModal).toBe("none");
   });
 });
 
@@ -398,14 +398,14 @@ describe('useProfilesManager - Modal Management', () => {
 // TEST SUITE: Error Recovery
 // ===================================================================
 
-describe('useProfilesManager - Error Recovery', () => {
+describe("useProfilesManager - Error Recovery", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should allow refetch after error', async () => {
+  it("should allow refetch after error", async () => {
     // First call fails
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
     const { result } = renderHook(() => useProfilesManager());
 
@@ -413,7 +413,7 @@ describe('useProfilesManager - Error Recovery', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.error).toBe('Network error');
+    expect(result.current.error).toBe("Network error");
     expect(result.current.profiles).toEqual([]);
 
     // Second call succeeds
@@ -433,11 +433,11 @@ describe('useProfilesManager - Error Recovery', () => {
     expect(result.current.profiles).toEqual(mockProfiles);
   });
 
-  it('should handle server errors (500) gracefully', async () => {
+  it("should handle server errors (500) gracefully", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 500,
-      json: async () => ({ error: 'internal_error' }),
+      json: async () => ({ error: "internal_error" }),
     });
 
     const { result } = renderHook(() => useProfilesManager());
@@ -447,7 +447,7 @@ describe('useProfilesManager - Error Recovery', () => {
     });
 
     // Assert: Generic error message
-    expect(result.current.error).toBe('Nie udało się załadować profili');
+    expect(result.current.error).toBe("Nie udało się załadować profili");
     expect(result.current.profiles).toEqual([]);
   });
 });
@@ -456,15 +456,13 @@ describe('useProfilesManager - Error Recovery', () => {
 // TEST SUITE: Edge Cases
 // ===================================================================
 
-describe('useProfilesManager - Edge Cases', () => {
+describe("useProfilesManager - Edge Cases", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should handle profiles with null avatar_url', async () => {
-    const profilesWithNullAvatar: ProfileDTO[] = [
-      { ...mockProfiles[0], avatar_url: null },
-    ];
+  it("should handle profiles with null avatar_url", async () => {
+    const profilesWithNullAvatar: ProfileDTO[] = [{ ...mockProfiles[0], avatar_url: null }];
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -482,7 +480,7 @@ describe('useProfilesManager - Edge Cases', () => {
     expect(result.current.profiles[0].avatar_url).toBeNull();
   });
 
-  it('should preserve profile order from API', async () => {
+  it("should preserve profile order from API", async () => {
     const orderedProfiles = [...mockProfiles].reverse();
 
     mockFetch.mockResolvedValueOnce({
@@ -502,7 +500,7 @@ describe('useProfilesManager - Edge Cases', () => {
     expect(result.current.profiles[1].id).toBe(orderedProfiles[1].id);
   });
 
-  it('should add new profile to beginning of list (most recent first)', async () => {
+  it("should add new profile to beginning of list (most recent first)", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -522,6 +520,6 @@ describe('useProfilesManager - Edge Cases', () => {
 
     // Assert: New profile is first
     expect(result.current.profiles[0].id).toBe(mockNewProfile.id);
-    expect(result.current.profiles[0].display_name).toBe('Zofia');
+    expect(result.current.profiles[0].display_name).toBe("Zofia");
   });
 });

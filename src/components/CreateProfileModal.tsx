@@ -2,32 +2,18 @@
  * CreateProfileModal Component
  *
  * Modal form for creating a new child profile.
- * Shown after parent passes the Parental Gate challenge.
- *
- * Features:
- * - Name input field with validation (2-50 characters, letters only)
- * - Avatar selector with 8 predefined avatars
- * - Submit to POST /api/profiles
- * - Error handling (validation, API errors, profile limit)
- *
- * Validation:
- * - Client-side validation with Zod schema
- * - Server-side validation enforced by API
- *
- * Props:
- * - isOpen: Whether modal is visible
- * - onCreated: Callback with newly created profile
- * - onClose: Callback to close modal
+ * Uses React Hook Form with Zod validation.
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { CreateProfileSchema } from "@/lib/validation/profile.schemas";
-import type { ProfileDTO, CreateProfileCommand } from "@/types";
-import { z } from "zod";
+import { CreateProfileSchema, type CreateProfileInput } from "@/lib/validation/profile.schemas";
+import type { ProfileDTO } from "@/types";
 import { getAccessToken } from "@/lib/supabase-browser";
 
 interface CreateProfileModalProps {
@@ -36,9 +22,6 @@ interface CreateProfileModalProps {
   onClose: () => void;
 }
 
-/**
- * Predefined avatar options (1-8)
- */
 const AVATAR_OPTIONS = [
   { id: 1, url: "avatars/avatar-1.svg", label: "Miś" },
   { id: 2, url: "avatars/avatar-2.svg", label: "Królik" },
@@ -51,159 +34,72 @@ const AVATAR_OPTIONS = [
 ];
 
 export default function CreateProfileModal({ isOpen, onCreated, onClose }: CreateProfileModalProps) {
-  // ===================================================================
-  // STATE
-  // ===================================================================
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateProfileInput>({
+    resolver: zodResolver(CreateProfileSchema),
+    defaultValues: {
+      display_name: "",
+      avatar_url: null,
+      language_code: "pl",
+    },
+  });
 
-  const [displayName, setDisplayName] = useState<string>("");
-  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const [validationErrors, setValidationErrors] = useState<{
-    display_name?: string;
-    avatar_url?: string;
-  }>({});
-
-  // ===================================================================
-  // EFFECTS
-  // ===================================================================
-
-  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setDisplayName("");
-      setSelectedAvatarUrl(null);
-      setError("");
-      setValidationErrors({});
-      setIsSubmitting(false);
+      reset();
     }
-  }, [isOpen]);
+  }, [isOpen, reset]);
 
-  // ===================================================================
-  // VALIDATION
-  // ===================================================================
-
-  /**
-   * Validate form data with Zod schema
-   */
-  const validateForm = useCallback((): boolean => {
-    setValidationErrors({});
-    setError("");
-
+  const onSubmit = async (data: CreateProfileInput) => {
     try {
-      CreateProfileSchema.parse({
-        display_name: displayName,
-        avatar_url: selectedAvatarUrl,
-        language_code: "pl",
-      });
-      return true;
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors: { display_name?: string; avatar_url?: string } = {};
+      const token = await getAccessToken();
 
-        err.errors.forEach((error) => {
-          const field = error.path[0] as "display_name" | "avatar_url";
-          errors[field] = error.message;
-        });
-
-        setValidationErrors(errors);
-      }
-      return false;
-    }
-  }, [displayName, selectedAvatarUrl]);
-
-  // ===================================================================
-  // HANDLERS
-  // ===================================================================
-
-  /**
-   * Handle form submission
-   */
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-
-      // Validate form
-      if (!validateForm()) {
+      if (!token) {
+        setError("root", { message: "Sesja wygasła. Zaloguj się ponownie." });
         return;
       }
 
-      setIsSubmitting(true);
-      setError("");
+      const response = await fetch("/api/profiles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
 
-      try {
-        // Get authentication token
-        const token = await getAccessToken();
+      if (!response.ok) {
+        const errorData = await response.json();
 
-        if (!token) {
-          setError("Sesja wygasła. Zaloguj się ponownie.");
+        if (response.status === 409) {
+          setError("root", {
+            message: "Osiągnięto maksymalną liczbę profili (5). Usuń istniejący profil, aby dodać nowy.",
+          });
           return;
         }
 
-        // Prepare request body
-        const requestBody: CreateProfileCommand = {
-          display_name: displayName,
-          avatar_url: selectedAvatarUrl,
-          language_code: "pl",
-        };
-
-        // Call API
-        const response = await fetch("/api/profiles", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: "include",
-          body: JSON.stringify(requestBody),
-        });
-
-        if (!response.ok) {
-          // Handle error responses
-          const errorData = await response.json();
-
-          // Special case: Profile limit exceeded
-          if (response.status === 409) {
-            setError("Osiągnięto maksymalną liczbę profili (5). Usuń istniejący profil, aby dodać nowy.");
-            return;
-          }
-
-          // Validation error from server
-          if (response.status === 400) {
-            setError(errorData.message || "Nieprawidłowe dane");
-            return;
-          }
-
-          // Generic error
-          throw new Error(errorData.message || "Nie udało się utworzyć profilu");
+        if (response.status === 400) {
+          setError("root", { message: errorData.message || "Nieprawidłowe dane" });
+          return;
         }
 
-        // Success!
-        const newProfile: ProfileDTO = await response.json();
-        onCreated(newProfile);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Nieznany błąd";
-        setError(errorMessage);
-        // eslint-disable-next-line no-console
-        console.error("Error creating profile:", err);
-      } finally {
-        setIsSubmitting(false);
+        throw new Error(errorData.message || "Nie udało się utworzyć profilu");
       }
-    },
-    [displayName, selectedAvatarUrl, validateForm, onCreated]
-  );
 
-  /**
-   * Handle avatar selection
-   */
-  const handleAvatarSelect = useCallback((avatarUrl: string) => {
-    setSelectedAvatarUrl(avatarUrl);
-    setValidationErrors((prev) => ({ ...prev, avatar_url: undefined }));
-  }, []);
-
-  // ===================================================================
-  // RENDER
-  // ===================================================================
+      const newProfile: ProfileDTO = await response.json();
+      onCreated(newProfile);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Nieznany błąd";
+      setError("root", { message: errorMessage });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -213,8 +109,7 @@ export default function CreateProfileModal({ isOpen, onCreated, onClose }: Creat
           <DialogDescription>Wprowadź imię dziecka i wybierz awatar</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 py-4">
-          {/* Display Name Input */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
           <div className="space-y-2">
             <Label htmlFor="display_name" className="text-base font-semibold">
               Imię dziecka
@@ -222,70 +117,64 @@ export default function CreateProfileModal({ isOpen, onCreated, onClose }: Creat
             <Input
               id="display_name"
               type="text"
-              value={displayName}
-              onChange={(e) => {
-                setDisplayName(e.target.value);
-                setValidationErrors((prev) => ({
-                  ...prev,
-                  display_name: undefined,
-                }));
-              }}
               placeholder="np. Maria, Jan"
-              className="text-lg"
+              className={`text-lg ${errors.display_name ? "border-red-500" : ""}`}
               disabled={isSubmitting}
+              {...register("display_name")}
             />
-            {validationErrors.display_name && <p className="text-sm text-red-600">{validationErrors.display_name}</p>}
+            {errors.display_name && <p className="text-sm text-red-600">{errors.display_name.message}</p>}
           </div>
 
-          {/* Avatar Selector */}
-          <div className="space-y-3">
-            <Label className="text-base font-semibold">Wybierz awatar (opcjonalnie)</Label>
-            <div className="grid grid-cols-4 gap-3">
-              {AVATAR_OPTIONS.map((avatar) => (
-                <button
-                  key={avatar.id}
-                  type="button"
-                  onClick={() => handleAvatarSelect(avatar.url)}
-                  disabled={isSubmitting}
-                  className={`relative overflow-hidden rounded-lg border-4 p-2 transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
-                    selectedAvatarUrl === avatar.url
-                      ? "border-purple-600 bg-purple-50"
-                      : "border-gray-200 hover:border-purple-300"
-                  }`}
-                  aria-label={avatar.label}
-                >
-                  <img
-                    src={`/${avatar.url}`}
-                    alt={avatar.label}
-                    className="h-full w-full rounded-md object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "/avatars/default-avatar.svg";
-                    }}
-                  />
-                  {selectedAvatarUrl === avatar.url && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-purple-600 bg-opacity-20">
-                      <div className="rounded-full bg-purple-600 p-1 text-white">✓</div>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-            {validationErrors.avatar_url && <p className="text-sm text-red-600">{validationErrors.avatar_url}</p>}
-          </div>
+          <Controller
+            name="avatar_url"
+            control={control}
+            render={({ field }) => (
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Wybierz awatar (opcjonalnie)</Label>
+                <div className="grid grid-cols-4 gap-3">
+                  {AVATAR_OPTIONS.map((avatar) => (
+                    <button
+                      key={avatar.id}
+                      type="button"
+                      onClick={() => field.onChange(avatar.url)}
+                      disabled={isSubmitting}
+                      className={`relative overflow-hidden rounded-lg border-4 p-2 transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
+                        field.value === avatar.url
+                          ? "border-purple-600 bg-purple-50"
+                          : "border-gray-200 hover:border-purple-300"
+                      }`}
+                      aria-label={avatar.label}
+                    >
+                      <img
+                        src={`/${avatar.url}`}
+                        alt={avatar.label}
+                        className="h-full w-full rounded-md object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/avatars/default-avatar.svg";
+                        }}
+                      />
+                      {field.value === avatar.url && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-purple-600 bg-opacity-20">
+                          <div className="rounded-full bg-purple-600 p-1 text-white">✓</div>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {errors.avatar_url && <p className="text-sm text-red-600">{errors.avatar_url.message}</p>}
+              </div>
+            )}
+          />
 
-          {/* Error Message */}
-          {error && <div className="rounded-lg bg-red-50 p-3 text-center text-red-700">{error}</div>}
+          {errors.root && (
+            <div className="rounded-lg bg-red-50 p-3 text-center text-red-700">{errors.root.message}</div>
+          )}
 
-          {/* Action Buttons */}
           <div className="flex gap-3">
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="flex-1">
               Anuluj
             </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || !displayName.trim()}
-              className="flex-1 bg-purple-600 hover:bg-purple-700"
-            >
+            <Button type="submit" disabled={isSubmitting} className="flex-1 bg-purple-600 hover:bg-purple-700">
               {isSubmitting ? "Tworzenie..." : "Utwórz profil"}
             </Button>
           </div>

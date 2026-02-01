@@ -1,240 +1,129 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FormField } from "@/components/forms/FormField";
+import { RegisterSchema, type RegisterInput } from "@/lib/validation/auth.schemas";
 
-/**
- * Register form data interface
- */
-interface RegisterFormData {
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-/**
- * Authentication error interface
- */
-interface AuthError {
-  message: string;
-  field?: "email" | "password" | "confirmPassword";
-}
-
-/**
- * RegisterForm Component
- *
- * Handles user registration via API endpoint.
- * Features:
- * - Email/password registration
- * - Password confirmation
- * - Client-side validation
- * - Error handling with user-friendly messages
- * - Auto-login after successful registration
- * - Link to login page
- */
 export default function RegisterForm() {
-  const [formData, setFormData] = useState<RegisterFormData>({
-    email: "",
-    password: "",
-    confirmPassword: "",
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [redirectDelay, setRedirectDelay] = useState<number | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(RegisterSchema),
+    mode: "onBlur",
   });
-  const [error, setError] = useState<AuthError | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  /**
-   * Validate email format
-   */
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  /**
-   * Handle input change
-   */
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    setError(null);
-  }, []);
-
-  /**
-   * Handle form submission
-   */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    // Client-side validation
-    if (!formData.email) {
-      setError({ message: "Wprowadź adres email", field: "email" });
-      return;
+  useEffect(() => {
+    if (redirectUrl && redirectDelay !== null) {
+      const timer = setTimeout(() => {
+        window.location.href = redirectUrl;
+      }, redirectDelay);
+      return () => clearTimeout(timer);
     }
+  }, [redirectUrl, redirectDelay]);
 
-    if (!validateEmail(formData.email)) {
-      setError({ message: "Wprowadź poprawny adres email", field: "email" });
-      return;
-    }
-
-    if (!formData.password) {
-      setError({ message: "Wprowadź hasło", field: "password" });
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError({
-        message: "Hasło musi mieć minimum 8 znaków",
-        field: "password",
-      });
-      return;
-    }
-
-    if (!formData.confirmPassword) {
-      setError({
-        message: "Potwierdź hasło",
-        field: "confirmPassword",
-      });
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError({
-        message: "Hasła nie są identyczne",
-        field: "confirmPassword",
-      });
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: RegisterInput) => {
+    setApiError(null);
+    setSuccessMessage(null);
 
     try {
-      // Call API endpoint instead of direct Supabase
       const response = await fetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
+          email: data.email,
+          password: data.password,
         }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        setError({
-          message: data.message || "Wystąpił błąd podczas rejestracji",
-          field: data.field,
-        });
-        setIsLoading(false);
+        setApiError(result.message || "Wystąpił błąd podczas rejestracji");
         return;
       }
 
       // Check if email confirmation is required
-      if (data.email_confirmation_required) {
-        // Email confirmation is enabled - show message and redirect to login
-        setError({
-          message: data.message || "Rejestracja udana! Sprawdź swoją skrzynkę email i potwierdź adres.",
-        });
-        setTimeout(() => {
-          window.location.href = "/auth/login";
-        }, 3000);
+      if (result.email_confirmation_required) {
+        setSuccessMessage(result.message || "Rejestracja udana! Sprawdź swoją skrzynkę email i potwierdź adres.");
+        setRedirectUrl("/auth/login");
+        setRedirectDelay(3000);
         return;
       }
 
-      // Auto-login successful (email confirmation disabled)
-      // Add a small delay to ensure cookies are set before redirect
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Redirect to profiles page with full page reload to ensure session sync
-      window.location.href = "/profiles";
-    } catch (err) {
-      console.error("Registration error:", err);
-      setError({ message: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie" });
-      setIsLoading(false);
+      // Auto-login successful
+      setRedirectUrl("/profiles");
+      setRedirectDelay(100);
+    } catch {
+      setApiError("Wystąpił nieoczekiwany błąd. Spróbuj ponownie");
     }
   };
 
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white rounded-lg shadow-lg p-8">
-        {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Utwórz konto</h1>
           <p className="text-gray-600">Zacznij naukę słówek ze swoim dzieckiem</p>
         </div>
 
-        {/* Error/Success alert */}
-        {error && (
-          <Alert variant={error.message.includes("udana") ? "default" : "destructive"} className="mb-4">
-            <AlertDescription>{error.message}</AlertDescription>
+        {successMessage && (
+          <Alert variant="default" className="mb-4">
+            <AlertDescription>{successMessage}</AlertDescription>
           </Alert>
         )}
 
-        {/* Register form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email field */}
-          <div>
-            <Label htmlFor="email">Adres email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="rodzic@example.com"
-              className={error?.field === "email" ? "border-red-500" : ""}
-              disabled={isLoading}
-              autoComplete="email"
-              required
-            />
-          </div>
+        {apiError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{apiError}</AlertDescription>
+          </Alert>
+        )}
 
-          {/* Password field */}
-          <div>
-            <Label htmlFor="password">Hasło</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className={error?.field === "password" ? "border-red-500" : ""}
-              disabled={isLoading}
-              autoComplete="new-password"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">Minimum 8 znaków</p>
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            label="Adres email"
+            type="email"
+            placeholder="rodzic@example.com"
+            registration={register("email")}
+            error={errors.email}
+            disabled={isSubmitting}
+            autoComplete="email"
+          />
 
-          {/* Confirm password field */}
-          <div>
-            <Label htmlFor="confirmPassword">Potwierdź hasło</Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className={error?.field === "confirmPassword" ? "border-red-500" : ""}
-              disabled={isLoading}
-              autoComplete="new-password"
-              required
-            />
-          </div>
+          <FormField
+            label="Hasło"
+            type="password"
+            placeholder="••••••••"
+            registration={register("password")}
+            error={errors.password}
+            disabled={isSubmitting}
+            autoComplete="new-password"
+            hint="Minimum 8 znaków"
+          />
 
-          {/* Submit button */}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Rejestracja..." : "Zarejestruj się"}
+          <FormField
+            label="Potwierdź hasło"
+            type="password"
+            placeholder="••••••••"
+            registration={register("confirmPassword")}
+            error={errors.confirmPassword}
+            disabled={isSubmitting}
+            autoComplete="new-password"
+          />
+
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Rejestracja..." : "Zarejestruj się"}
           </Button>
         </form>
 
-        {/* Login link */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Masz już konto?{" "}

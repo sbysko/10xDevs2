@@ -8,9 +8,9 @@
  * - Configure test utilities
  */
 
-import { expect, vi } from 'vitest';
-import { cleanup } from '@testing-library/react';
-import * as matchers from '@testing-library/jest-dom/matchers';
+import { expect, vi } from "vitest";
+import { cleanup } from "@testing-library/react";
+import * as matchers from "@testing-library/jest-dom/matchers";
 
 // ===================================================================
 // EXTEND VITEST MATCHERS
@@ -35,19 +35,19 @@ expect.extend(matchers);
 // Mock window.location for navigation tests
 delete (window as Partial<Window>).location;
 window.location = {
-  href: 'http://localhost:3000',
-  origin: 'http://localhost:3000',
-  protocol: 'http:',
-  host: 'localhost:3000',
-  hostname: 'localhost',
-  port: '3000',
-  pathname: '/',
-  search: '',
-  hash: '',
+  href: "http://localhost:3000",
+  origin: "http://localhost:3000",
+  protocol: "http:",
+  host: "localhost:3000",
+  hostname: "localhost",
+  port: "3000",
+  pathname: "/",
+  search: "",
+  hash: "",
   assign: vi.fn(),
   reload: vi.fn(),
   replace: vi.fn(),
-  toString: vi.fn(() => 'http://localhost:3000'),
+  toString: vi.fn(() => "http://localhost:3000"),
   ancestorOrigins: {} as DOMStringList,
 };
 
@@ -67,7 +67,7 @@ global.console = {
 // ===================================================================
 
 // Augment Vitest's expect with jest-dom matchers
-declare module 'vitest' {
+declare module "vitest" {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interface Assertion<T = any> extends jest.Matchers<void, T> {
     toBeInTheDocument(): T;
