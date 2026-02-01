@@ -46,7 +46,8 @@
       "Bash(npx vitest:*)",
       "Bash(echo:*)",
       "Bash(dir:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(git -C \"d:/VSCode/10xDevs2\" branch -a)"
     ],
     "deny": [],
     "ask": []
