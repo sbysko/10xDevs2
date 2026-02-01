@@ -374,3 +374,4 @@ curl -s https://api.github.com/repos/{owner}/{repo} | grep '"archived":'
 ```bash
 curl -s https://raw.githubusercontent.com/{owner}/{repo}/refs/heads/{main/master}/action.yml
 ```
+
