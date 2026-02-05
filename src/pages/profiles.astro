@@ -73,20 +73,20 @@ if (profileCount === 1 && profiles && !isSwitchingProfile) {
 
   <main class="min-h-screen bg-gradient-to-b from-blue-100 to-purple-100 p-4 md:p-8">
     <div class="mx-auto max-w-6xl">
-      {singleProfile ? (
-        <!-- Auto-select single profile and redirect -->
-        <AutoSelectProfile client:load profile={singleProfile} />
-      ) : (
-        <>
-          <header class="mb-8 text-center">
-            <h1 class="mb-2 text-4xl font-bold text-purple-800 md:text-5xl">Kto dziś gra?</h1>
-            <p class="text-lg text-purple-600 md:text-xl">Wybierz swój profil, aby rozpocząć zabawę!</p>
-          </header>
+      {
+        singleProfile ? (
+          <AutoSelectProfile client:load profile={singleProfile} />
+        ) : (
+          <>
+            <header class="mb-8 text-center">
+              <h1 class="mb-2 text-4xl font-bold text-purple-800 md:text-5xl">Kto dziś gra?</h1>
+              <p class="text-lg text-purple-600 md:text-xl">Wybierz swój profil, aby rozpocząć zabawę!</p>
+            </header>
 
-          <!-- React Island: Interactive profile management -->
-          <ProfileManager client:load />
-        </>
-      )}
+            <ProfileManager client:load />
+          </>
+        )
+      }
     </div>
   </main>
 </Layout>

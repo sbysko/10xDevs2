@@ -90,8 +90,7 @@ export default function GameSessionManager({ category }: GameSessionManagerProps
     if (isComplete && answers.length > 0 && profileId) {
       saveProgress();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isComplete, answers.length, profileId]);
+  }, [isComplete, answers.length, profileId, saveProgress]);
 
   // ===================================================================
   // API FUNCTIONS

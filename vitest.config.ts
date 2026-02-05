@@ -8,18 +8,14 @@ export default defineConfig({
     // Use jsdom environment for React components and hooks testing
     environment: "jsdom",
 
-    // Pool configuration for Vitest 4 (new format)
-    pool: "forks",
-    poolMatchGlobs: [
-      ["**/*.test.ts", "forks"],
-      ["**/*.test.tsx", "forks"],
-    ],
-
-    // Forks pool options (Vitest 4 format)
-    singleFork: true,
+    // Setup file
+    setupFiles: ["./vitest.setup.ts"],
 
     // Enable global test APIs (describe, it, expect, etc.)
     globals: true,
+
+    // Use vmThreads pool (better compatibility with jsdom on Windows)
+    pool: "vmThreads",
 
     // Coverage configuration
     coverage: {
